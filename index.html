@@ -305,6 +305,7 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .result{display:grid;gap:18px;max-width:760px}
 .stamp{display:inline-flex;align-self:start;justify-self:start;font:800 1rem/1 var(--font-display);padding:10px 14px;border-radius:10px;border:2px solid var(--good);color:var(--good);background:var(--good-soft);transform:rotate(-1.5deg)}
 .result.notyet .stamp{border-color:var(--gold);color:var(--gold);background:var(--gold-soft)}
+.res-h{font-size:clamp(1.6rem,4.5vw,2.4rem)}
 .big-score .pts{font-size:.35em;font-weight:700;color:var(--muted)}
 .big-score{font:800 clamp(2.4rem,8vw,4rem)/1 var(--font-display);font-variant-numeric:tabular-nums}
 .misslist{margin:0;padding-left:20px;display:grid;gap:4px}
@@ -317,6 +318,7 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .ring span{display:block;font:700 .6rem/1.25 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;text-wrap:balance}
 .ring.ne{border-color:var(--gold);background:var(--gold-soft);color:var(--gold)}
 .ring.ne b{font-size:2.4rem}
+.ring b.ip{font-size:2.3rem}
 .badge-name{font:800 clamp(1.6rem,4.5vw,2.3rem)/1.1 var(--font-display)}
 .meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted)}
 .ok-t{color:var(--good);font-weight:700}
@@ -1139,6 +1141,11 @@ body.docked .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 .lvc-top{display:flex;gap:10px;align-items:center}.lvc-top .mono{color:var(--muted)}
 .lvc-k{color:var(--accent-ink);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.7rem}
 .lvcard ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.92rem}
+.finalcard{display:grid;gap:12px}
+.cuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.cuts>div{border-radius:12px;padding:10px 12px;display:grid;gap:2px;background:var(--good-soft)}.cuts>div:nth-child(2){background:var(--accent-soft)}.cuts>div:nth-child(3){background:var(--surface-2);border:1px solid var(--line)}.cuts>div:nth-child(4){background:var(--gold-soft)}
+.cuts span{font-size:.85rem;color:var(--muted)}
+@media (max-width:560px){.cuts{grid-template-columns:1fr 1fr}}
 .rulegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .rule{background:var(--accent-soft);border-radius:12px;padding:12px 14px;display:grid;gap:4px}
 .meet{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:center;margin-top:8px;border-top:6px solid var(--accent)}
@@ -1548,15 +1555,24 @@ function makeCase(cond,sexPick){
 
 /* ---------- state ---------- */
 const KEY='mustang-karyo-lab-v1';
-const mkLv=()=>({learned:false,started:0,attempts:[],passed:false});
+const mkLv=()=>({learned:false,started:0,attempts:[]});
 const fresh=name=>({name,started:Date.now(),lv:{1:mkLv(),2:mkLv(),3:mkLv()},written:{1:'',2:''},manual:{1:0,2:0,3:0},notes:{},arcade:{}});
 let S=(()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}})();
+// Level 3 rounds saved before it was scored in points: 6 per solved case, plus 4 if the lab order took 2 tries or fewer
+if(S)S.lv[3].attempts.forEach(a=>{if(a.v)return;a.score=a.score*6+(a.createOk?4:0);a.total=a.total*6+4;a.est=true;a.v=2});
 const save=()=>{if(!S)return;S.active=P;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 let P=(S&&S.active)||null;
 let view={name:S?'hub':'intro',arg:{}};
-const unlocked=n=>n===1||S.lv[n-1].passed;
-function levelEarned(){let e=0;for(const l of [1,2,3]){if(S.lv[l].passed)e=l;else break}return e}
-function bestAtt(l){const a=S.lv[l].attempts;if(!a.length)return null;return a.reduce((b,x)=>((x.pass&&!b.pass)||(x.pass===b.pass&&x.score/x.total>=b.score/b.total))?x:b)}
+// finishing a level's Prove It, at any score, completes it and unlocks the next level
+const complete=l=>S.lv[l].attempts.length>0;
+const unlocked=n=>n===1||complete(n-1);
+function bestAtt(l){const a=S.lv[l].attempts;if(!a.length)return null;return a.reduce((b,x)=>x.score>b.score||(x.score===b.score&&x.score/x.total>=b.score/b.total)?x:b)}
+/* final proficiency: best points from each level, added up; it only becomes a level once all three are finished */
+const CUTS=[[80,3],[60,2],[40,1]];
+function final(){const ls=[1,2,3].filter(complete),pts=ls.reduce((a,l)=>a+bestAtt(l).score,0),tot=ls.reduce((a,l)=>a+bestAtt(l).total,0);
+  const pct=tot?Math.floor(pts/tot*100):null,done=ls.length===3,byScore=done?(CUTS.find(c=>pct>=c[0])||[0,0])[1]:null;
+  return {pts,tot,pct,done,n:ls.length,byScore,level:done?Math.min(byScore,hintCap(hintsCounted())):null}}
+const lvName=l=>l?`Level ${l}`:'NE';
 
 /* ---------- router ---------- */
 let HIST=[];
@@ -1588,7 +1604,7 @@ function render(){CLEAN.forEach(f=>{try{f()}catch(e){}});CLEAN=[];PAGE=null;rend
 const BRAND=`<svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="5" y="3" width="6.5" height="20" rx="3.25" fill="var(--accent-ink)"/><rect x="14.5" y="3" width="6.5" height="20" rx="3.25" fill="var(--accent)"/><rect x="5" y="8" width="16" height="2.2" fill="var(--bg)"/><rect x="5" y="15" width="16" height="3" fill="var(--bg)"/></svg>`;
 function renderTop(){
   const t=$('#top');
-  const track=S?`<div class="track" aria-label="Credentials">${[1,2,3].map(l=>`<span class="pill ${S.lv[l].passed?'earned':unlocked(l)?'open':''}" title="${LVINFO[l].badge}">L${l} ${S.lv[l].passed?'✓':''}</span>`).join('')}</div>`:'';
+  const track=S?`<div class="track" aria-label="Credentials">${[1,2,3].map(l=>`<span class="pill ${complete(l)?'earned':unlocked(l)?'open':''}" title="${LVINFO[l].badge}">L${l} ${complete(l)?'✓':''}</span>`).join('')}</div>`:'';
   const prevSB=($('.scorebar',t)||{}).textContent;
   t.innerHTML=`<div class="top-in">${S&&canBack()?`<button class="btn ghost sm backbtn" id="backBtn" type="button" aria-label="Go back">← Back</button>`:''}<button class="brand" id="brand">${BRAND}<span>Mustang Karyotype Lab</span></button>${scoreBar()}<div class="top-right">${S?`<span class="who">${esc(S.name)}</span>${track}<button type="button" class="marty-btn" id="martyBtn" aria-label="Ask Marty, your lab assistant, for help" aria-expanded="${XOPEN}">${martySVG(34,{head:true})}<span class="xv-badge" title="Hints left">${hintsLeft()}</span></button><button class="btn ghost sm" id="tocBtn" type="button">Contents</button><button class="btn ghost sm notes-btn" id="notesBtn" type="button" aria-label="My Notes">${IC.notes}<span class="hide-sm">My Notes</span><span class="nb-c">${noteN()}</span></button>`:''}</div></div>`;
   {const sb=$('.scorebar',t);if(sb&&prevSB&&sb.textContent!==prevSB&&!reduced){sb.classList.add('bump')}}
@@ -1614,7 +1630,7 @@ function openContents(){
   const body=`<nav class="toc">
   <button class="toc-link" data-go="hub" type="button"${cur('hub')}>Shift board</button>
   ${P?`<button class="toc-link toc-resume" data-resume type="button"${cur('prove')}>${IC.play} Resume Level ${P.lv} Prove It · ${P.phase==='items'?`item ${Math.min(P.results.length+1,P.items.length)} of ${P.items.length}`:'last step'}</button>`:''}
-  ${[1,2,3].map(l=>{const open=unlocked(l),L=S.lv[l];return `<section class="toc-lv${open?'':' locked'}"><h3>Level ${l} · ${LVINFO[l].badge}${L.passed?' <span class="ok-t">✓ earned</span>':''}</h3>${open?`<ol>${LEARN[l].map((x,i)=>{const ok=L.learned||i<=reach(l);return `<li><button class="toc-link" data-lv="${l}" data-step="${i}" type="button"${cur('learn',{lv:l,step:i})}${ok?'':' disabled'}>${ok?'':IC.lock+' '}${x.title}${!L.learned&&lvDone(l).includes(i)?' <span class="ok-t">✓</span>':''}</button></li>`}).join('')}</ol><button class="toc-link toc-prove" data-prove="${l}" type="button" ${L.learned||(P&&P.lv===l)?'':'disabled'}>${P&&P.lv===l?IC.play+' Resume Prove It':L.learned?'Prove It':IC.lock+' Prove It · finish the lesson first'}</button>`:`<p class="small muted">${IC.lock} Locked · earn Level ${l-1} first</p>`}</section>`}).join('')}
+  ${[1,2,3].map(l=>{const open=unlocked(l),L=S.lv[l];return `<section class="toc-lv${open?'':' locked'}"><h3>Level ${l} · ${LVINFO[l].badge}${complete(l)?' <span class="ok-t">✓ complete</span>':''}</h3>${open?`<ol>${LEARN[l].map((x,i)=>{const ok=L.learned||i<=reach(l);return `<li><button class="toc-link" data-lv="${l}" data-step="${i}" type="button"${cur('learn',{lv:l,step:i})}${ok?'':' disabled'}>${ok?'':IC.lock+' '}${x.title}${!L.learned&&lvDone(l).includes(i)?' <span class="ok-t">✓</span>':''}</button></li>`}).join('')}</ol><button class="toc-link toc-prove" data-prove="${l}" type="button" ${L.learned||(P&&P.lv===l)?'':'disabled'}>${P&&P.lv===l?IC.play+' Resume Prove It':L.learned?(complete(l)?'Retake Prove It':'Prove It'):IC.lock+' Prove It · finish the lesson first'}</button>`:`<p class="small muted">${IC.lock} Locked · finish the Level ${l-1} Prove It first</p>`}</section>`}).join('')}
   <button class="toc-link" data-go="report" type="button"${cur('report')}>Credential report</button><p class="small muted toc-time">${IC.clock} Active lab time: ${fmtTime(actT('total'))}</p><button class="toc-link toc-restart" data-restart type="button">Start over from the beginning</button></nav>`;
   openDrawer('Contents',body,(m,close)=>{
     $$('[data-go]',m).forEach(b=>b.onclick=()=>{close();go(b.dataset.go)});$$('[data-restart]',m).forEach(b=>b.onclick=()=>{close();confirmRestart()});
@@ -1817,13 +1833,14 @@ RENDER.case=(root,it,done)=>{
       if(locked)return;locked=true;$('#dxsub',dx).disabled=true;const wrong=[];const chosen={};
       fields.forEach(f=>{const v=f.opts[sel[f.k]];chosen[f.k]=v;const ok=v===key[f.k];const fe=$(`.field[data-k="${f.k}"]`,dx);fe.classList.add(ok?'right':'wrong');
         if(!ok){wrong.push(f.k);$$('.seg button',fe).forEach(b=>{if(f.opts[+b.dataset.i]===key[f.k])b.classList.add('key')});$('.fnote',fe).textContent='Correct answer: '+key[f.k]}});
-      const solved=chosen.cond===key.cond&&wrong.length<=1;
+      // 1 point per question answered correctly; mismatches while pairing are logged but cost nothing
+      const solved=chosen.cond===key.cond&&wrong.length<=1,pts=fields.length-wrong.length;
       const not=notation(c.cond,c.sex);
-      const why=`Karyotype <span class="mono">${not}</span>. ${C.note}${mistakes?` You had ${mistakes} mismatched placement${mistakes>1?'s':''} while pairing.`:' You paired every chromosome on the first try.'}`;
+      const why=`Karyotype <span class="mono">${not}</span>. ${C.note}${mistakes?` You had ${mistakes} mismatched placement${mistakes>1?'s':''} while pairing. Those don’t cost points.`:' You paired every chromosome on the first try.'}`;
       const fb=$('.fb',dx);
-      fb.innerHTML=`<div class="fbbox ${solved?'ok':'no'}"><strong>${solved?'Case solved.':'Case not solved.'}</strong> <span>${why}</span></div><button class="btn" type="button">Next</button>`;
+      fb.innerHTML=`<div class="fbbox ${solved?'ok':'no'}"><strong>${solved?'Case solved.':'Case not solved.'} ${pts} of ${fields.length} points.</strong> <span>${why}</span></div><button class="btn" type="button">Next</button>`;
       const nb=$('button',fb);nb.focus({preventScroll:true});fb.scrollIntoView({block:'nearest',behavior:reduced?'auto':'smooth'});
-      const missText=`Patient ${c.id}: ${solved?'solved, but missed '+wrong.join(', '):'answered '+chosen.cond+' (actual: '+C.name+')'}`,detail={type:'case',id:c.id,cond:C.name,notation:not,chosen:chosen.cond,solved,wrong:wrong.length,mistakes};
+      const missText=`Patient ${c.id}: ${solved?'solved, but missed '+wrong.join(', '):'answered '+chosen.cond+' (actual: '+C.name+')'}`,detail={type:'case',id:c.id,cond:C.name,notation:not,chosen:chosen.cond,solved,wrong:wrong.length,mistakes,pts,max:fields.length};
       done.record&&done.record(solved,missText,detail);
       nb.onclick=()=>done(solved,missText,detail);
     };
@@ -1853,9 +1870,10 @@ RENDER.create=(root,it,done)=>{
     if(finished)return;const fb=$('.fb',root);
     if(!notSel){showFB(fb,false,'Choose a karyotype notation before you submit.',null,{noNext:true});return}
     const okLay=AUTOS.every(a=>lay[a].length===want[a])&&lay.SEX.map(x=>x.chr).sort().join('')===wantSex;const okNot=notSel===correctNot;
-    if(okLay&&okNot){finished=true;$('#csub',root).disabled=true;const ok=tries<=1;const mt=ok?null:`Lab order for ${C.name} took ${tries+1} submissions`,dt={type:'create',cond:C.name,tries:tries+1};
+    // 4 points on the first submission, 3 on the second, 2 on the third, 1 after that
+    if(okLay&&okNot){finished=true;$('#csub',root).disabled=true;const pts=Math.max(1,4-tries),ok=!tries;const mt=ok?null:`Lab order for ${C.name} took ${tries+1} submissions (${pts} of 4 points)`,dt={type:'create',cond:C.name,tries:tries+1,pts,max:4};
       done.record&&done.record(ok,mt,dt);
-      showFB(fb,true,`That karyotype shows ${C.name}: <span class="mono">${correctNot}</span>. ${tries?`You got it on submission ${tries+1}.`:'First try.'}`,()=>done(ok,mt,dt));return}
+      showFB(fb,true,`That karyotype shows ${C.name}: <span class="mono">${correctNot}</span>. ${tries?`You got it on submission ${tries+1}.`:'First try.'} <b>${pts} of 4 points.</b>`,()=>done(ok,mt,dt));return}
     tries++;it.tries=tries;save();const msgs=[];
     if(!okLay)msgs.push(total()!==wantTotal?`${C.name} has ${wantTotal} chromosomes in total, and yours has ${total()}.`:`Your total is right, but the chromosomes don’t match ${C.name} yet. Check which pair has the change.`);
     if(!okNot)msgs.push('Check the notation: total first, then sex chromosomes, then any extra autosome.');
@@ -1957,7 +1975,7 @@ function emblem(l,{size=64,state='open'}={}){
   const badge=state==='earned'?`<circle cx="52" cy="52" r="9" fill="var(--good)"/><path d="M48 52l3 3 5-6" stroke="var(--surface)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`:state==='locked'?`<rect x="45" y="49" width="14" height="11" rx="2.5" fill="var(--muted)"/><path d="M48 49v-3a4 4 0 0 1 8 0v3" fill="none" stroke="var(--muted)" stroke-width="2"/>`:'';
   return `<svg class="emblem" viewBox="0 0 64 64" width="${size}" height="${size}" aria-hidden="true"><path d="M32 3L57 17.5V46.5L32 61L7 46.5V17.5Z" fill="${fill}" stroke="${ring}" stroke-width="3" stroke-linejoin="round"/>${inner}${badge}</svg>`;
 }
-const lvState=l=>!S?'open':S.lv[l].passed?'earned':unlocked(l)?'open':'locked';
+const lvState=l=>!S?'open':complete(l)?'earned':unlocked(l)?'open':'locked';
 
 /* microscope eyepiece with a drifting metaphase spread */
 function eyepiece(){
@@ -2393,16 +2411,15 @@ function mountLocus(body,{genes},ready){
 /* ---------- score, hints, and Marty ---------- */
 const HINT_MAX=6;
 const hintCap=h=>h<=2?3:h<=4?2:1;
-function lvHints(l){const a=S.lv[l].attempts.filter(x=>x.pass);return a.length?Math.min(...a.map(x=>x.hints||0)):0}
-function hintsCounted(){return [1,2,3].reduce((s,l)=>s+(S.lv[l].passed?lvHints(l):0),0)}
-function hintsLeft(){if(!S)return HINT_MAX;const other=[1,2,3].filter(l=>!P||l!==P.lv).reduce((s,l)=>s+(S.lv[l].passed?lvHints(l):0),0);return Math.max(0,HINT_MAX-other-(P?P.hints||0:0))}
+// the hints that count for a level are the ones used in its best round
+function lvHints(l){const b=bestAtt(l);return b?b.hints||0:0}
+function hintsCounted(){return [1,2,3].reduce((s,l)=>s+lvHints(l),0)}
+function hintsLeft(){if(!S)return HINT_MAX;const other=[1,2,3].filter(l=>!P||l!==P.lv).reduce((s,l)=>s+lvHints(l),0);return Math.max(0,HINT_MAX-other-(P?P.hints||0:0))}
 function hintsNow(){return HINT_MAX-hintsLeft()}
-function profLevel(){const e=levelEarned();return e?Math.min(e,hintCap(hintsCounted())):0}
 function pctRound(){if(!P||!P.results.length)return null;let a=0,b=0;P.results.forEach(r=>{const d=r.detail;if(d&&d.max!=null){a+=d.pts;b+=d.max}else{a+=r.ok?1:0;b+=1}});return b?Math.round(a/b*100):null}
-function pctOverall(){const ls=[1,2,3].filter(l=>S.lv[l].attempts.length);if(!ls.length)return null;return Math.round(ls.reduce((s,l)=>{const b=bestAtt(l);return s+(b.total?b.score/b.total*100:0)},0)/ls.length)}
 function scoreBar(){
-  if(!S)return '';const inRound=view.name==='prove'&&P;const pct=inRound?pctRound():pctOverall();const lv=profLevel();
-  return `<div class="scorebar" aria-label="Your progress"><span class="sb-cell"><b>${pct==null?'—':pct+'%'}</b><small>${inRound?'this round':'score'}</small></span><span class="sb-cell sb-lvl ${lv?'':'ne'}"><b>${lv?'Level '+lv:'NE'}</b><small>proficiency</small></span><span class="sb-cell sb-hint" title="Hints left">${IC.bulb}<b>${hintsLeft()}</b><small>hints</small></span></div>`;
+  if(!S)return '';const inRound=view.name==='prove'&&P;const F=final();const pct=inRound?pctRound():F.pct;
+  return `<div class="scorebar" aria-label="Your progress"><span class="sb-cell"><b>${pct==null?'—':pct+'%'}</b><small>${inRound?'this round':'overall'}</small></span><span class="sb-cell sb-lvl ${F.done&&!F.level?'ne':''}"><b>${F.done?lvName(F.level):'In progress'}</b><small>${F.done?'proficiency':'final level'}</small></span><span class="sb-cell sb-hint" title="Hints left">${IC.bulb}<b>${hintsLeft()}</b><small>hints</small></span></div>`;
 }
 /* hint text for whatever Prove It item is on screen */
 const NUMHINT={46:'Think pairs: how many pairs does a body cell have, and how many chromosomes are in each pair?',22:'Pair 23 is the sex chromosomes. Every pair before it is an autosome pair.',23:'An egg or sperm carries only one chromosome from each pair.',47:'Trisomy means one chromosome more than the typical number.'};
@@ -2428,7 +2445,7 @@ function renderMarty(){
   const use=$('[data-usehint]',x);if(use)use.onclick=()=>{P.hints=(P.hints||0)+1;P.hinted=[...(P.hinted||[]),P.i];P.hintLog=[...(P.hintLog||[]),{i:P.i,type:P.items[P.i].type||P.items[P.i].kind}];save();XJUST=true;renderTop();renderMarty();XJUST=false;const b=$('#martyBtn .marty');b&&b.classList.add('cheer')};
   const no=$('[data-nohint]',x);if(no)no.onclick=()=>{XOPEN=false;renderMarty()};
 }
-function capLine(){return `<p class="xv-rule">Hints across your credentials: <b>0–2</b> keeps Level 3 possible, <b>3–4</b> caps you at Level 2, <b>5–6</b> caps you at Level 1. You get ${HINT_MAX} total.</p>`}
+function capLine(){return `<p class="xv-rule">Hints across all three levels: <b>0–2</b> keeps Level 3 possible, <b>3–4</b> caps your final level at Level 2, <b>5–6</b> caps it at Level 1. You get ${HINT_MAX} total.</p>`}
 function xaviMessage(){
   const v=view.name;
   if(v==='prove'&&P&&P.items[P.i]){
@@ -2437,10 +2454,12 @@ function xaviMessage(){
     const left=hintsLeft(),used=hintsNow();
     if(!left)return `<p>You’re out of hints. You’ve got this. Reread the question, and remember My Notes is in the top bar.</p>`;
     const after=hintCap(used+1);
-    return `<p>Stuck? I can give you a hint for this question.</p><p class="small">You have <b>${left}</b> of ${HINT_MAX} hints left.${after<hintCap(used)?` Using this one caps your proficiency at <b>Level ${after}</b>.`:''}</p>${capLine()}<div class="row"><button type="button" class="btn sm" data-usehint>Use a hint</button><button type="button" class="btn ghost sm" data-nohint>Not yet</button></div>`;
+    return `<p>Stuck? I can give you a hint for this question.</p><p class="small">You have <b>${left}</b> of ${HINT_MAX} hints left.${after<hintCap(used)?` Using this one caps your final level at <b>Level ${after}</b>, no matter your score.`:''}</p>${capLine()}<div class="row"><button type="button" class="btn sm" data-usehint>Use a hint</button><button type="button" class="btn ghost sm" data-nohint>Not yet</button></div>`;
   }
   if(v==='learn'){const t=(TIPS[view.arg.lv]||[])[Math.min(view.arg.step||0,99)];return `<p class="xv-hint">${t||'Work through every activity on the page. Each one gives you feedback as you go.'}</p><p class="small muted">Lesson tips are free. Hints during Prove It count toward your level.</p>`}
-  return `<p>Hi! I’m Marty, the Mustang, and I run this lab. Tap me up here in the top bar during a lesson for a free tip, or during Prove It when you’re stuck.</p>${capLine()}<p class="small muted">You have ${hintsLeft()} hints left.</p>`;
+  const F=final();
+  const where=F.done?`All three levels are done. Your final level is <b>${lvName(F.level)}</b> with <b>${F.pct}%</b> overall. Retake any level to raise your score.`:`Finish all three Prove It rounds, at any score, and your best points from each level add up to your final level.${F.n?` You’re at <b>${F.pct}%</b> so far, with ${F.n} of 3 done.`:''}`;
+  return `<p>Hi! I’m Marty, the Mustang, and I run this lab. Tap me up here in the top bar during a lesson for a free tip, or during Prove It when you’re stuck.</p><p class="small">${where}</p>${capLine()}<p class="small muted">You have ${hintsLeft()} hints left.</p>`;
 }
 
 const HQ={
@@ -2805,18 +2824,22 @@ const LEARN={
 
 /* ---------- screens ---------- */
 const SCREENS={};
+const L3_MAX=16; // two patient cases at 6 questions each, plus the 4-point lab order
 function roundPts(lv){return buildRound(lv).reduce((a,it)=>a+(GQ[it.type](it).pts||1),0)}
 SCREENS.intro=app=>{
-  const t1=roundPts(1),t2=roundPts(2),n1=Math.ceil(t1*.8),n2=Math.ceil(t2*.8);
+  const t1=roundPts(1),t2=roundPts(2),tAll=t1+t2+L3_MAX;
   const strip=[...AUTOS,'X','Y'].map((id,i)=>`<div class="strip-item" style="--i:${i}">${chrSVG(id,{scale:.34,w:12})}<span class="mono">${id}</span></div>`).join('');
   app.innerHTML=`<section class="hero"><div class="hero-top"><div class="stack" style="gap:12px"><p class="kicker">Mustang Memorial Hospital · Cytogenetics Lab</p><h1>Mustang <span class="shimmer">Karyotype</span> Lab</h1><p class="lede">You’re the lab’s newest hire, and specimens are stacking up. Learn to read chromosomes, diagnose real cases, and earn three credentials.</p></div><div class="ep-wrap">${eyepiece()}<div class="mini-field f1"><canvas class="cellcv" data-st="0" data-seed="77" aria-hidden="true"></canvas><span>Working cell · 400×</span></div><div class="mini-field f2"><canvas class="cellcv" data-st="1" data-seed="91" aria-hidden="true"></canvas><span>Condensing · 400×</span></div><div class="mini-field f3"><div class="mf-helix">${(()=>{let a='',b='',r='';for(let x=0;x<=100;x+=2){const y1=50+22*Math.sin(x/100*6.283*1.5),y2=50-22*Math.sin(x/100*6.283*1.5);a+=(x?'L':'M')+x+','+y1.toFixed(1);b+=(x?'L':'M')+x+','+y2.toFixed(1);if(x%8===0)r+=`<line x1="${x}" x2="${x}" y1="${y1.toFixed(1)}" y2="${y2.toFixed(1)}"/>`}return `<svg viewBox="0 0 100 100" aria-hidden="true"><g class="mf-spin"><g stroke="#E3B455" stroke-width="2.4">${r}</g><path d="${a}" fill="none" stroke="#7E57C2" stroke-width="4"/><path d="${b}" fill="none" stroke="#4B9CD3" stroke-width="4"/></g></svg>`})()}</div><span>DNA · 2 nm wide</span></div></div></div>
   <div class="lightbox strip"><div class="strip-scan" aria-hidden="true"></div><div class="strip-in">${strip}</div></div>
   <div class="start"><div class="card stack">${S?`<div class="stack"><h2>Welcome back, ${esc(S.name)}</h2><p class="muted">Your progress is saved on this device.</p><div class="row"><button class="btn" id="cont" type="button">Back to the lab</button><button class="btn ghost" id="over" type="button">Start over as someone new</button></div><div id="confirm" hidden class="stack"><p>This erases ${esc(S.name)}’s progress on this device.</p><div class="row"><button class="btn" id="yes" type="button">Erase and start over</button><button class="btn ghost" id="no" type="button">Keep my progress</button></div></div></div>`:
   `<form id="nf"><label class="lab" for="tname">Trainee name (first and last)</label><div class="field-in"><input id="tname" autocomplete="name" placeholder="e.g. Jordan Vang"><button class="btn" type="submit">Clock in</button></div><p class="err" id="nerr" hidden>Enter your first and last name so your report counts.</p></form>`}</div>
   <div class="stack">${[[IC.notes,'Learn','Work through short lesson parts full of games, animations, and quick checks. Your notes fill in as you go.'],[IC.target,'Prove it','Show what you know in an auto-graded round. You see your score right away.'],[IC.camera,'Turn it in','Screenshot your credential report and upload it to the Google Classroom assignment.']].map(([ic,t,d],i)=>`<div class="cred"><span class="cred-n">${ic}</span><div><h3>${i+1} · ${t}</h3><p>${d}</p></div></div>`).join('')}</div></div>
-  <section class="howto"><div><p class="kicker">How scoring works</p><h2>How you earn each level</h2><p class="muted">Every level has a lesson, then a Prove It round. Levels build on each other, so you earn them in order.</p></div>
-   <div class="lvgrid">${[[1,[`Finish the Trainee lesson (5 parts).`,`Score at least <b>${n1} of ${t1} points</b> (80%) in Prove It.`]],[2,[`Earn Level 1 first.`,`Finish the Technician lesson (7 parts).`,`Score at least <b>${n2} of ${t2} points</b> (80%) in Prove It.`]],[3,[`Earn Level 2 first.`,`Finish the Cytogeneticist lesson (3 parts).`,`Correctly diagnose <b>both patients</b>.`,`Build the lab-order karyotype in <b>2 tries or fewer</b>.`]]].map(([l,req])=>`<article class="lvcard l${l}"><div class="lvc-top">${emblem(l,{size:46,state:'open'})}<div><span class="mono">Level ${l}</span><h3>${LVINFO[l].badge}</h3></div></div><p class="small">${LVINFO[l].ican}</p><p class="lvc-k mono">To earn it</p><ul>${req.map(r=>`<li>${r}</li>`).join('')}</ul></article>`).join('')}</div>
-   <div class="rulegrid"><div class="rule"><b>NE = Not Enough Evidence</b><p class="small">An NE isn’t a failure. It just means there isn’t enough evidence yet to show proficiency.</p></div><div class="rule"><b>Unlimited retakes</b><p class="small">Every retake uses new specimens, and your best round counts.</p></div><div class="rule"><b>Open notes</b><p class="small">My Notes fill in as you finish each lesson part. You can open them in Prove It, and your report shows how often you did.</p></div><div class="rule"><b>Active time</b><p class="small">The lab tracks the time you spend actively working, and it goes on your report.</p></div></div></section>
+  <section class="howto"><div><p class="kicker">How scoring works</p><h2>How you earn each level</h2><p class="muted">Every level has a lesson, then a Prove It round. Go in order: finishing a level’s Prove It, at any score, unlocks the next lesson. Once you finish all three, your best points from each level add up to one final score.</p></div>
+   <div class="lvgrid">${[[1,[`Finish the Trainee lesson (5 parts).`,`Finish the Prove It round: <b>${t1} points</b> possible.`]],[2,[`Finish the Level 1 Prove It first.`,`Finish the Technician lesson (7 parts).`,`Finish the Prove It round: <b>${t2} points</b> possible.`]],[3,[`Finish the Level 2 Prove It first.`,`Finish the Cytogeneticist lesson (3 parts).`,`Diagnose two patients: <b>1 point</b> per question, 6 per patient.`,`Build the lab-order karyotype: <b>4 points</b> on the first submission, then 3, 2, or 1.`]]].map(([l,req])=>`<article class="lvcard l${l}"><div class="lvc-top">${emblem(l,{size:46,state:'open'})}<div><span class="mono">Level ${l}</span><h3>${LVINFO[l].badge}</h3></div></div><p class="small">${LVINFO[l].ican}</p><p class="lvc-k mono">To complete it</p><ul>${req.map(r=>`<li>${r}</li>`).join('')}</ul></article>`).join('')}</div>
+   <div class="card finalcard"><div><p class="lvc-k mono">Your final level</p><p class="small">Overall score = your best points from all three levels, out of <b>${tAll}</b> possible.</p></div>
+    <div class="cuts" role="table" aria-label="Final level cut-offs"><div role="row"><b role="cell">80% or higher</b><span role="cell">Level 3</span></div><div role="row"><b role="cell">60–79%</b><span role="cell">Level 2</span></div><div role="row"><b role="cell">40–59%</b><span role="cell">Level 1</span></div><div role="row"><b role="cell">Below 40%</b><span role="cell">NE</span></div></div>
+    <p class="small"><b>Then the hint cap:</b> 0–2 hints keeps Level 3 possible, 3–4 hints caps you at Level 2, and 5–6 hints caps you at Level 1. Your final level is the lower of the two.</p></div>
+   <div class="rulegrid"><div class="rule"><b>NE = Not Enough Evidence</b><p class="small">An NE isn’t a failure. It just means there isn’t enough evidence yet. You only get a final level after all three rounds.</p></div><div class="rule"><b>Unlimited retakes</b><p class="small">Retake any level with new specimens. Your best round for each level counts.</p></div><div class="rule"><b>Open notes</b><p class="small">My Notes fill in as you finish each lesson part. You can open them in Prove It, and your report shows how often you did.</p></div><div class="rule"><b>Active time</b><p class="small">The lab tracks the time you spend actively working, and it goes on your report.</p></div></div></section>
   <section class="card meet"><div class="meet-art">${martySVG(120)}</div><div class="stack" style="gap:12px"><p class="kicker">Meet your lab assistant</p><h2>Hi, I’m Marty Mustang!</h2><p>I run this lab, and I’ll be right up in the <b>top bar</b> the whole time. Tap my face whenever you need me.</p>
    <ul class="meet-list"><li><b>During lessons,</b> I give free tips. Use as many as you want.</li><li><b>During Prove It,</b> I can give you a hint for the question you’re stuck on. You get <b>${HINT_MAX} hints total</b> across all three levels, and they affect the highest level you can show:</li></ul>
    <div class="hintscale"><div><b>0–2 hints</b><span>Level 3 still possible</span></div><div><b>3–4 hints</b><span>Capped at Level 2</span></div><div><b>5–6 hints</b><span>Capped at Level 1</span></div></div>
@@ -2827,14 +2850,14 @@ SCREENS.intro=app=>{
 SCREENS.hub=app=>{
   if(!S)return go('intro');
   [1,2,3].forEach(l=>{if(!S.lv[l].learned&&unlocked(l)&&LEARN[l].every((_,i)=>lvDone(l).includes(i))){S.lv[l].learned=true;save()}});
-  const earned=levelEarned();
-  app.innerHTML=`<div class="hub-head"><div class="stack" style="gap:6px"><p class="kicker">Shift board</p><h1 style="font-size:clamp(1.8rem,5vw,2.6rem)">${earned===3?'All credentials earned':`Welcome, ${esc(S.name.split(' ')[0])}`}</h1><p class="muted">Each credential has a lesson, then a Prove It round. Earn them in order.</p><p class="act-chip mono">${IC.clock} Active lab time: <b id="actNow">${fmtTime(actT('total'))}</b></p></div><div class="hub-btns"><button class="btn ghost" id="rep" type="button">Open my credential report</button><button class="btn ghost sm danger-link" id="restart" type="button">Start over</button></div></div>
+  const F=final();
+  app.innerHTML=`<div class="hub-head"><div class="stack" style="gap:6px"><p class="kicker">Shift board</p><h1 style="font-size:clamp(1.8rem,5vw,2.6rem)">${F.done?'All three levels complete':`Welcome, ${esc(S.name.split(' ')[0])}`}</h1><p class="muted">Each level has a lesson, then a Prove It round. Go in order. When all three are finished, your best points from each level add up to your final level.</p>${F.done?`<p class="act-chip mono">Final proficiency: <b>${lvName(F.level)}</b> · ${F.pct}% overall</p>`:F.n?`<p class="act-chip mono">Running score: <b>${F.pct}%</b> · ${F.n} of 3 levels finished</p>`:''}<p class="act-chip mono">${IC.clock} Active lab time: <b id="actNow">${fmtTime(actT('total'))}</b></p></div><div class="hub-btns"><button class="btn ghost" id="rep" type="button">Open my credential report</button><button class="btn ghost sm danger-link" id="restart" type="button">Start over</button></div></div>
   <div class="levels">${[1,2,3].map(l=>{const L=S.lv[l];const open=unlocked(l);const best=bestAtt(l);const resume=P&&P.lv===l;
     const nSteps=LEARN[l].length,at=open&&!L.learned?reach(l):0;
-    const status=!open?`Locked · earn Level ${l-1} first`:L.passed?`Credential earned · best ${best.score}/${best.total}`:L.attempts.length?`Not yet · best ${best.score}/${best.total} · ${L.attempts.length} attempt${L.attempts.length>1?'s':''}`:L.learned?'Lesson done · ready to prove it':at?`Lesson in progress · page ${at+1} of ${nSteps}. Finish it to unlock Prove It.`:`Next step: take the ${nSteps}-page lesson. Prove It unlocks at the end.`;
+    const status=!open?`Locked · finish the Level ${l-1} Prove It first`:best?`Complete · best ${best.score}/${best.total} points · ${L.attempts.length} round${L.attempts.length>1?'s':''}`:L.learned?'Lesson done · ready to prove it':at?`Lesson in progress · page ${at+1} of ${nSteps}. Finish it to unlock Prove It.`:`Next step: take the ${nSteps}-page lesson. Prove It unlocks at the end.`;
     const learnLabel=L.learned?'Review lesson':at?`Continue lesson (page ${at+1} of ${nSteps})`:'Start lesson';
-    const acts=!open?'':`<button class="btn ${L.learned?'ghost':''}" data-learn="${l}" type="button">${learnLabel}</button>${resume?`<button class="btn" data-resume="${l}" type="button">Resume Prove It</button>`:L.learned?`<button class="btn" data-prove="${l}" type="button">${L.passed?'Replay with new specimens':L.attempts.length?'Try again with new specimens':'Prove it'}</button>`:`<button class="btn ghost" type="button" disabled title="Finish the lesson to unlock">${IC.lock} Prove it</button>`}`;
-    return `<div class="card level ${L.passed?'done':open?'open':'locked'}"><div class="lv-em">${emblem(l,{size:64,state:L.passed?'earned':open?'open':'locked'})}<span class="lv-n">Level ${l}</span></div><div class="lv-body"><h3>${LVINFO[l].badge} · ${LVINFO[l].skill}</h3><p class="lv-ican">${LVINFO[l].ican}</p><span class="lv-status">${status}</span></div><div class="lv-actions">${acts}</div></div>`}).join('')}</div>${arcadeHTML()}`;
+    const acts=!open?'':`<button class="btn ${L.learned?'ghost':''}" data-learn="${l}" type="button">${learnLabel}</button>${resume?`<button class="btn" data-resume="${l}" type="button">Resume Prove It</button>`:L.learned?`<button class="btn" data-prove="${l}" type="button">${best?'Retake for a higher score':'Prove it'}</button>`:`<button class="btn ghost" type="button" disabled title="Finish the lesson to unlock">${IC.lock} Prove it</button>`}`;
+    return `<div class="card level ${best?'done':open?'open':'locked'}"><div class="lv-em">${emblem(l,{size:64,state:best?'earned':open?'open':'locked'})}<span class="lv-n">Level ${l}</span></div><div class="lv-body"><h3>${LVINFO[l].badge} · ${LVINFO[l].skill}</h3><p class="lv-ican">${LVINFO[l].ican}</p><span class="lv-status">${status}</span></div><div class="lv-actions">${acts}</div></div>`}).join('')}</div>${arcadeHTML()}`;
   $('#rep').onclick=()=>go('report');$('#restart').onclick=confirmRestart;
   $$('[data-arc]').forEach(b=>b.onclick=()=>go('arcade',{g:b.dataset.arc}));
   $$('[data-learn]').forEach(b=>b.onclick=()=>{const l=+b.dataset.learn;go('learn',{lv:l,step:S.lv[l].learned?0:reach(l)})});
@@ -2888,42 +2911,68 @@ SCREENS.prove=app=>{
     RENDER[it.kind](area,it,done)}
 };
 function finishProve(){
-  const lv=P.lv,ms=Date.now()-P.start;let att;
-  if(lv<3){const pt=r=>r.detail&&r.detail.max!=null;const score=P.results.reduce((a,r)=>a+(pt(r)?r.detail.pts:r.ok?1:0),0),total=P.results.reduce((a,r)=>a+(pt(r)?r.detail.max:1),0);att={score,total,pass:score>=Math.ceil(total*.8),ms,when:Date.now(),manual:P.manual,missed:P.results.filter(r=>!r.ok).map(r=>r.miss)}}
-  else{const cases=P.results.filter(r=>r.detail&&r.detail.type==='case');const cr=P.results.find(r=>r.detail&&r.detail.type==='create');const solved=cases.filter(r=>r.ok).length;
-    att={score:solved,total:cases.length,createOk:!!(cr&&cr.ok),createTries:cr?cr.detail.tries:0,createCond:cr?cr.detail.cond:'',pass:solved>=cases.length&&!!(cr&&cr.ok),ms,when:Date.now(),manual:P.manual,missed:P.results.filter(r=>!r.ok||(r.detail&&r.detail.wrong)).map(r=>r.miss).filter(Boolean),caseLog:cases.map(r=>r.detail)}}
-  att.hints=P.hints||0;const L=S.lv[lv];L.attempts.push(att);if(att.pass)L.passed=true;P=null;save();go('results',{lv,att});
+  const lv=P.lv,ms=Date.now()-P.start;
+  // every item reports points; a Level 3 round started before points were added only saved wrong answers and submissions
+  const ptsOf=r=>{const d=r.detail;if(d&&d.max!=null)return [d.pts,d.max];if(d&&d.type==='case')return [6-d.wrong,6];if(d&&d.type==='create')return [Math.max(1,5-d.tries),4];return [r.ok?1:0,1]};
+  const att={v:2,score:P.results.reduce((a,r)=>a+ptsOf(r)[0],0),total:P.results.reduce((a,r)=>a+ptsOf(r)[1],0),ms,when:Date.now(),manual:P.manual,hints:P.hints||0,missed:P.results.filter(r=>!r.ok).map(r=>r.miss)};
+  if(lv===3){const cases=P.results.filter(r=>r.detail&&r.detail.type==='case'),cr=P.results.find(r=>r.detail&&r.detail.type==='create');
+    Object.assign(att,{createTries:cr?cr.detail.tries:0,createPts:cr?ptsOf(cr)[0]:0,createCond:cr?cr.detail.cond:'',missed:P.results.filter(r=>!r.ok||(r.detail&&r.detail.wrong)).map(r=>r.miss).filter(Boolean),caseLog:cases.map(r=>({...r.detail,pts:ptsOf(r)[0],max:ptsOf(r)[1]}))})}
+  S.lv[lv].attempts.push(att);P=null;save();go('results',{lv,att});
 }
+const CUT_TXT='80% or higher: Level 3 · 60–79%: Level 2 · 40–59%: Level 1 · below 40%: NE';
+const NE_TXT='An NE isn’t a failure. It just means there isn’t enough evidence yet.';
+const pctOf=b=>Math.floor(b.score/b.total*100);
 SCREENS.results=(app,{lv,att})=>{
   if(!att)return go('hub');
-  const need=lv<3?`${Math.ceil(att.total*.8)} of ${att.total} points`:'both patients diagnosed, plus the lab order built in 2 tries or fewer';
-  app.innerHTML=`<section class="result ${att.pass?'pass':'notyet'}"><div class="res-top">${emblem(lv,{size:110,state:att.pass?'earned':'open'})}<div class="stack" style="gap:10px"><p class="kicker">Level ${lv} results</p><div class="stamp">${att.pass?`${LVINFO[lv].badge} credential earned`:'NE · Not enough evidence yet'}</div>
-  <div class="big-score">${lv<3?`${att.score} / ${att.total}<small class="pts"> points</small>`:`${att.score} of ${att.total} cases`}</div></div></div>
-  ${lv===3?`<p>Lab order (${esc(att.createCond)}): ${att.createOk?`<span class="ok-t">built in ${att.createTries} ${att.createTries>1?'tries':'try'}</span>`:`<span class="no-t">took ${att.createTries} tries</span>`}</p>`:''}
-  <p class="muted">${att.pass?(lv<3?`You showed the evidence for Level ${lv}. Your next credential is unlocked.`:'You showed evidence at every level. Open your credential report and turn it in.'):`An NE isn’t a failure. It just means there isn’t enough evidence yet to show proficiency. You need ${need}. Look over the spots below, then try again with new specimens.`}</p>
-  <p class="hintline">${IC.bulb} Hints used this round: <b>${att.hints||0}</b>${att.pass?` · Your proficiency now shows as <b>${profLevel()?'Level '+profLevel():'NE'}</b>${profLevel()<levelEarned()?'. Hints capped it. Retake a level with fewer hints to raise it.':'.'}`:''}</p>
-  ${att.missed.length?`<div class="card"><h3>Look back at</h3><ul class="misslist" style="margin-top:8px">${att.missed.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`:''}
-  <div class="row">${att.pass?(lv<3?`<button class="btn" id="nx" type="button">Start Level ${lv+1}</button>`:`<button class="btn" id="rp" type="button">Open my credential report</button>`):`<button class="btn" id="again" type="button">Try again with new specimens</button><button class="btn ghost" id="rev" type="button">Review the lesson</button>`}<button class="btn ghost" id="hub" type="button">Shift board</button></div></section>`;
+  const F=final(),b=bestAtt(lv),isBest=b.when===att.when;
+  const look=att.missed.length?`<div class="card"><h3>Look back at</h3><ul class="misslist" style="margin-top:8px">${att.missed.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`:'';
   const on=(id,f)=>{const e=$('#'+id);if(e)e.onclick=f};
-  if(att.pass&&!att.cele){att.cele=1;setTimeout(confetti,250)}
-  on('nx',()=>go('learn',{lv:lv+1,step:0}));on('rp',()=>go('report'));on('again',()=>startProve(lv));on('rev',()=>go('learn',{lv,step:0}));on('hub',()=>go('hub'));
+  if(lv<3||!F.done){
+    app.innerHTML=`<section class="result pass"><div class="res-top">${emblem(lv,{size:110,state:'earned'})}<div class="stack" style="gap:10px"><p class="kicker">Level ${lv} results</p><h1 class="res-h">Level ${lv} complete</h1>
+    <div class="big-score">${att.score} / ${att.total}<small class="pts"> points</small></div></div></div>
+    <p>${isBest?(S.lv[lv].attempts.length>1?'That’s your best round for this level, so it’s the one that counts.':'Your points are saved.'):`Your best round for this level is still <b>${b.score} / ${b.total}</b>, and that’s the one that counts.`} ${lv<3?`Level ${lv+1} is unlocked.`:''} Your best points from all three levels add up to your final level, so keep going and come back later to retake this level if you want a higher score.</p>
+    ${F.done?`<p>Your final proficiency is now <b>${lvName(F.level)}</b> with <b>${F.pct}%</b> overall.</p>`:''}
+    <p class="hintline">${IC.bulb} Hints used this round: <b>${att.hints||0}</b></p>
+    ${look}
+    <div class="row">${lv<3?`<button class="btn" id="nx" type="button">Continue to Level ${lv+1}</button>`:''}<button class="btn ghost" id="again" type="button">Retake for a higher score</button><button class="btn ghost" id="hub" type="button">Shift board</button></div></section>`;
+    on('nx',()=>{const l=lv+1;go('learn',{lv:l,step:S.lv[l].learned?0:reach(l)})});
+  }else{
+    const e=F.level,capped=F.byScore>e;
+    const rows=[1,2,3].map(l=>{const x=bestAtt(l);return `<tr><td><b>${l} · ${LVINFO[l].badge}</b></td><td class="mono">${x.score} / ${x.total}${x.est?' (est.)':''}</td><td class="mono">${pctOf(x)}%</td></tr>`}).join('');
+    app.innerHTML=`<section class="result ${e?'pass':'notyet'}"><div class="res-top">${emblem(e||3,{size:110,state:e?'earned':'open'})}<div class="stack" style="gap:10px"><p class="kicker">Final proficiency</p><div class="stamp">${e?`Level ${e} · ${LVINFO[e].badge}`:'NE · Not enough evidence yet'}</div>
+    <div class="big-score">${F.pct}%<small class="pts"> overall</small></div></div></div>
+    <p>${e?`<b>${LVINFO[e].badge}:</b> ${LVINFO[e].ican}`:`${NE_TXT} Retake any level with new specimens to raise your score.`}</p>
+    ${capped?`<p class="hintline">${IC.bulb} Your points reach Level ${F.byScore}, but ${hintsCounted()} hints cap your final level at Level ${e}. To raise it, retake a level and match or beat its best score with fewer hints.</p>`:''}
+    <div class="card"><h3>Points by level</h3><div class="tbl-wrap" style="margin-top:10px"><table><tr><th>Level</th><th>Best points</th><th>Score</th></tr>${rows}<tr><td><b>Overall</b></td><td class="mono"><b>${F.pts} / ${F.tot}</b></td><td class="mono"><b>${F.pct}%</b></td></tr></table></div>
+    <p class="small muted" style="margin-top:10px">This Level 3 round: <b>${att.score} / ${att.total}</b> points${isBest?'':` (your best is ${b.score} / ${b.total})`}. ${CUT_TXT}. Hints used this round: ${att.hints||0}.</p></div>
+    ${look}
+    <div class="row"><button class="btn" id="rp" type="button">Open my credential report</button><button class="btn ghost" id="again" type="button">Retake Level 3 for a higher score</button><button class="btn ghost" id="hub" type="button">Shift board</button></div></section>`;
+    if(e&&!att.cele){att.cele=1;setTimeout(confetti,250)}
+  }
+  on('rp',()=>go('report'));on('again',()=>startProve(lv));on('hub',()=>go('hub'));
 };
 function latest(l){const a=S.lv[l].attempts;return a[a.length-1]||null}
 function reportText(){
-  const e=profLevel();const lines=[`MUSTANG KARYOTYPE LAB · Credential Report`,`Trainee: ${S.name}`,`Standard 2.1 Chromosomes and Karyotyping (HS-LS3-1)`,`Proficiency level shown: ${e?'Level '+e:'NE (not enough evidence yet)'}`,`Hints counted: ${hintsCounted()} of ${HINT_MAX} (0–2 keeps Level 3, 3–4 caps at Level 2, 5–6 caps at Level 1)`,`Active lab time: ${fmtTime(actT('total'))} (arcade practice: ${fmtTime(actT('arcade'))})`,`Generated: ${new Date().toLocaleString()}`,''];
-  [1,2,3].forEach(l=>{const L=S.lv[l],b=bestAtt(l);lines.push(`Level ${l} ${LVINFO[l].badge}: ${L.passed?'EARNED':L.attempts.length?'not yet':'not started'}${b?` · best ${b.score}/${b.total}`:''} · finished ${L.attempts.length} of ${L.started} started · hints: ${L.passed?lvHints(l):'—'} · notes/lesson peeks during Prove It: ${S.manual[l]} · active time: lesson ${actFmt(actT('l'+l+'learn'))}, Prove It ${actFmt(actT('l'+l+'prove'))}`)});
-  const l3=bestAtt(3);if(l3&&l3.caseLog){lines.push('','Case log:');l3.caseLog.forEach(c=>lines.push(`  ${c.id} ${c.notation} → answered ${c.chosen} (${c.solved?'solved':'not solved'})`));lines.push(`  Lab order ${l3.createCond}: ${l3.createTries} tries`)}
+  const F=final(),e=F.level;const lines=[`MUSTANG KARYOTYPE LAB · Credential Report`,`Trainee: ${S.name}`,`Standard 2.1 Chromosomes and Karyotyping (HS-LS3-1)`,
+    `Final proficiency: ${F.done?(e?`Level ${e} ${LVINFO[e].badge}`:'NE (not enough evidence yet)'):`In progress (${F.n} of 3 levels finished)`}`,
+    `Overall score: ${F.pct==null?'—':`${F.pts}/${F.tot} points (${F.pct}%)`}`,`Cut-offs: ${CUT_TXT}`,
+    `Hints counted: ${hintsCounted()} of ${HINT_MAX} (0–2 keeps Level 3, 3–4 caps at Level 2, 5–6 caps at Level 1)`,`Active lab time: ${fmtTime(actT('total'))} (arcade practice: ${fmtTime(actT('arcade'))})`,`Generated: ${new Date().toLocaleString()}`,''];
+  [1,2,3].forEach(l=>{const L=S.lv[l],b=bestAtt(l);lines.push(`Level ${l} ${LVINFO[l].badge}: ${b?`complete · best ${b.score}/${b.total} points (${pctOf(b)}%)${b.est?' (estimated)':''}`:L.started?'in progress':'not started'} · finished ${L.attempts.length} of ${L.started} started · hints: ${b?lvHints(l):'—'} · notes/lesson peeks during Prove It: ${S.manual[l]} · active time: lesson ${actFmt(actT('l'+l+'learn'))}, Prove It ${actFmt(actT('l'+l+'prove'))}`)});
+  const l3=bestAtt(3);if(l3&&l3.caseLog){lines.push('','Case log (best Level 3 round):');l3.caseLog.forEach(c=>lines.push(`  ${c.id} ${c.notation} → answered ${c.chosen} (${c.solved?'solved':'not solved'}${c.pts!=null?`, ${c.pts}/${c.max} points`:''}, ${c.mistakes} mismatched placement${c.mistakes===1?'':'s'})`));lines.push(`  Lab order ${l3.createCond}: ${l3.createTries} submission${l3.createTries===1?'':'s'}${l3.createPts!=null?`, ${l3.createPts}/4 points`:''}`)}
   return lines.join('\n');
 }
 SCREENS.report=app=>{
   if(!S)return go('intro');
-  const e=profLevel();
-  const l3=bestAtt(3);
+  const F=final(),e=F.level;
+  const l3=bestAtt(3),est=[1,2,3].some(l=>(bestAtt(l)||{}).est);
   const struggles=[...new Set([1,2,3].flatMap(l=>{const a=latest(l);return a?a.missed.map(m=>`L${l} · ${m}`):[]}))].slice(0,10);
-  app.innerHTML=`<section class="report"><div class="card badge"><div class="ring ${e?'':'ne'}"><div><b>${e||'NE'}</b><span>${e?'Proficiency level':'Not enough evidence'}</span></div></div><div class="stack" style="gap:8px"><p class="kicker">Credential report · Standard 2.1 · HS-LS3-1</p><div class="badge-name">${esc(S.name)}</div><p>${e?`${LVINFO[e].badge}: ${LVINFO[e].ican}`:'No credential yet. That’s a signal to gather more evidence, not a failure. Start with Level 1.'}</p><div class="em-row">${[1,2,3].map(l=>`<span class="em-item">${emblem(l,{size:46,state:S.lv[l].passed?'earned':'locked'})}<span class="mono">${LVINFO[l].badge}</span></span>`).join('')}</div><div class="meta mono"><span>${new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})} · ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span><span>Active lab time: ${fmtTime(actT('total'))}</span></div></div></div>
-  <div class="tbl-wrap"><table><tr><th>Level</th><th>Status</th><th>Best score</th><th>Rounds finished / started</th><th>Hints (counting round)</th><th>Notes or lesson peeks during Prove It</th><th>Active time (lesson / Prove It)</th></tr>${[1,2,3].map(l=>{const L=S.lv[l],b=bestAtt(l);return `<tr><td><b>${l} · ${LVINFO[l].badge}</b></td><td>${L.passed?'<span class="ok-t">Earned</span>':L.attempts.length?'<span class="no-t">Not yet</span>':'<span class="muted">Not started</span>'}</td><td class="mono">${b?(l<3?`${b.score}/${b.total} (${Math.round(b.score/b.total*100)}%)`:`${b.score}/${b.total} cases · order ${b.createTries} ${b.createTries===1?'try':'tries'}`):'—'}</td><td class="mono">${L.attempts.length} / ${L.started}</td><td class="mono">${L.passed?lvHints(l):'—'}</td><td class="mono">${S.manual[l]}</td><td class="mono">${actFmt(actT('l'+l+'learn'))} / ${actFmt(actT('l'+l+'prove'))}</td></tr>`}).join('')}</table></div>
-  ${l3&&l3.caseLog?`<div class="card"><h3>Case log (best Level 3 round)</h3><div class="tbl-wrap" style="margin-top:10px"><table><tr><th>Patient</th><th>Karyotype</th><th>Student diagnosis</th><th>Result</th><th>Mismatched placements</th></tr>${l3.caseLog.map(c=>`<tr><td class="mono">${c.id}</td><td class="mono">${c.notation}</td><td>${esc(c.chosen)}</td><td>${c.solved?'<span class="ok-t">Solved</span>':'<span class="no-t">Not solved</span>'}</td><td class="mono">${c.mistakes}</td></tr>`).join('')}<tr><td class="mono">Lab order</td><td colspan="2">Built ${esc(l3.createCond)}</td><td>${l3.createOk?'<span class="ok-t">Done</span>':'<span class="no-t">Over 2 tries</span>'}</td><td class="mono">${l3.createTries} ${l3.createTries===1?'try':'tries'}</td></tr></table></div></div>`:''}
-  <div class="card hintcard"><h3>Hints</h3><p>${hintsCounted()} of ${HINT_MAX} hints count toward this report. ${hintsCounted()<=2?'That keeps Level 3 within reach.':hintsCounted()<=4?'That caps proficiency at Level 2.':'That caps proficiency at Level 1.'}${levelEarned()>e?` Without the hint cap, the credentials earned would show Level ${levelEarned()}.`:''}</p></div>
+  app.innerHTML=`<section class="report"><div class="card badge"><div class="ring ${F.done&&!e?'ne':''}"><div>${F.done?`<b>${e||'NE'}</b><span>${e?'Proficiency level':'Not enough evidence'}</span>`:`<b class="ip">${F.pct==null?'—':F.pct+'%'}</b><span>In progress</span>`}</div></div><div class="stack" style="gap:8px"><p class="kicker">Credential report · Standard 2.1 · HS-LS3-1</p><div class="badge-name">${esc(S.name)}</div>
+  <p>${F.done?(e?`${LVINFO[e].badge}: ${LVINFO[e].ican}`:`${NE_TXT} Retake any level with new specimens to raise the score.`):`Final proficiency shows once all three levels are finished. ${F.n} of 3 done so far.`}</p><div class="em-row">${[1,2,3].map(l=>`<span class="em-item">${emblem(l,{size:46,state:complete(l)?'earned':'locked'})}<span class="mono">${LVINFO[l].badge}</span></span>`).join('')}</div><div class="meta mono"><span>${new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})} · ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span><span>Overall: ${F.pct==null?'—':`${F.pts} / ${F.tot} points (${F.pct}%)`}</span><span>Active lab time: ${fmtTime(actT('total'))}</span></div></div></div>
+  <div class="tbl-wrap"><table><tr><th>Level</th><th>Status</th><th>Best points</th><th>Rounds finished / started</th><th>Hints (counting round)</th><th>Notes or lesson peeks during Prove It</th><th>Active time (lesson / Prove It)</th></tr>${[1,2,3].map(l=>{const L=S.lv[l],b=bestAtt(l);return `<tr><td><b>${l} · ${LVINFO[l].badge}</b></td><td>${b?'<span class="ok-t">Complete</span>':L.started?'<span class="muted">In progress</span>':'<span class="muted">Not started</span>'}</td><td class="mono">${b?`${b.score}/${b.total} (${pctOf(b)}%)${b.est?' est.':''}`:'—'}</td><td class="mono">${L.attempts.length} / ${L.started}</td><td class="mono">${b?lvHints(l):'—'}</td><td class="mono">${S.manual[l]}</td><td class="mono">${actFmt(actT('l'+l+'learn'))} / ${actFmt(actT('l'+l+'prove'))}</td></tr>`}).join('')}
+  <tr><td><b>Overall</b></td><td>${F.done?`<b>${lvName(e)}</b>`:'<span class="muted">In progress</span>'}</td><td class="mono"><b>${F.pct==null?'—':`${F.pts}/${F.tot} (${F.pct}%)`}</b></td><td colspan="4" class="small muted">${CUT_TXT}. Then the hint cap applies.</td></tr></table></div>
+  ${est?`<p class="small muted">est. = a Level 3 round from before points scoring, estimated as 6 points per solved case plus 4 for a lab order built in 2 tries or fewer.</p>`:''}
+  ${l3&&l3.caseLog?`<div class="card"><h3>Case log (best Level 3 round)</h3><div class="tbl-wrap" style="margin-top:10px"><table><tr><th>Patient</th><th>Karyotype</th><th>Student diagnosis</th><th>Result</th><th>Points</th><th>Mismatched placements (no points lost)</th></tr>${l3.caseLog.map(c=>`<tr><td class="mono">${c.id}</td><td class="mono">${c.notation}</td><td>${esc(c.chosen)}</td><td>${c.solved?'<span class="ok-t">Solved</span>':'<span class="no-t">Not solved</span>'}</td><td class="mono">${c.pts!=null?`${c.pts}/${c.max}`:'—'}</td><td class="mono">${c.mistakes}</td></tr>`).join('')}<tr><td class="mono">Lab order</td><td colspan="2">Built ${esc(l3.createCond)}</td><td>${l3.createTries} submission${l3.createTries===1?'':'s'}</td><td class="mono">${l3.createPts!=null?`${l3.createPts}/4`:'—'}</td><td class="mono">—</td></tr></table></div></div>`:''}
+  <div class="card hintcard"><h3>Hints</h3><p>${hintsCounted()} of ${HINT_MAX} hints count toward this report (the hints from each level’s best round). ${hintsCounted()<=2?'That keeps Level 3 within reach.':hintsCounted()<=4?'That caps the final level at Level 2.':'That caps the final level at Level 1.'}${F.done&&F.byScore>e?` Without the hint cap, the score would show Level ${F.byScore}.`:''}</p></div>
   <div class="card"><h3>Where I struggled (most recent rounds)</h3>${struggles.length?`<ul class="misslist" style="margin-top:8px">${struggles.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`:'<p class="muted" style="margin-top:6px">Nothing missed in the most recent rounds.</p>'}</div>
   <div class="row"><button class="btn" id="copy" type="button">Copy report as text</button><button class="btn ghost" id="hub" type="button">Back to shift board</button></div>
   <div class="card turnin"><h3>${IC.camera} Turn in your evidence</h3><ol class="turnin-steps">
