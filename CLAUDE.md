@@ -13,6 +13,7 @@ Single-file web game for Biology Standard 2.1, Chromosomes and Karyotyping (HS-L
 - Every part of every lesson should have something students interact with, not just read.
 - Respect the `reduced` flag for any new animation (and use `.rm` in CSS, not a `prefers-reduced-motion` media query; SVG `<animate>` goes through `noMotion`). The flag comes only from the Motion setting in Settings (`setMotion`, saved in localStorage under `mustang-karyo-motion`). It defaults to Full for everyone. Never read the operating system's `prefers-reduced-motion`: many school computers have it on, and following it froze the animations. Background animation is a separate on/off setting.
 - Color-blind-friendly mode (`.cb` on `<html>`, `CB()` in JS): anything new that uses color to carry meaning (right/wrong, groups, rows, mom/dad, progress) also needs a non-color cue under `.cb`, such as a check/X badge, a shape, a number, or a label.
+- Chromosomes everywhere are drawn in the karyotype style (`chrSVG`, `nestChr`; `chrFixed`/`nestFixed`/`chrBitmap` for fixed colors and canvas games). The coiled-fiber look (`coilX`, `drawPack`, the micrographs) belongs only to the Level 1 chromatin-vs-chromosome parts. Eggs and sperm carry single rods (`single:true`); chromosomes switch to the copied X shape once the zygote copies its DNA.
 - Size new text in rem, not px, so the Text size setting scales it.
 - Animation loops book their next frame first (`raf=requestAnimationFrame(loop)` at the top), so one bad frame can't stop them.
 - Before committing, open `index.html` in a browser (or a local server) and check the change at desktop and phone widths in light and dark mode. Check the browser console for errors.
@@ -33,7 +34,7 @@ Single-file web game for Biology Standard 2.1, Chromosomes and Karyotyping (HS-L
 - `ORGS`, `FAKES`, `impostor` – the Level 1 species match (Human plus three others each time) and the Spot the impostor activity.
 - `tableGame`, `rowMark` – the rebuild-the-table game: placed tiles lock in their row color with a checkmark stamp.
 - `mountUnscramble` – Prove It scramble items: students can type the answer or tap/drag letter tiles; both stay in sync.
-- `ndFigure`, `ndRows`, `ndAnim` – Level 2 "Too many, too few": the mistake can happen in the egg or the sperm (Mistake in: Egg/Sperm), and chromosome 21 is drawn as a copied, banded chromosome like the Level 3 karyotypes.
+- `ndFigure`, `ndRows`, `ndAnim` – Level 2 "Too many, too few": the mistake can happen in the egg or the sperm (Mistake in: Egg/Sperm). Gametes show single rods; the zygote shows X-shaped chromosomes like the Level 3 karyotypes (`ND_NOTE` explains why).
 - `layoutPins`, `watchPins` – placed gene pins sit in a column beside the chromosome 11 ideogram with leader lines, so they never cover a band.
 - `AMB.calm` – the animated background holds still if the page runs under about 24 frames a second.
 - `NOTES` – My Notes entries; each unlocks when the lesson part with the matching `note` key is finished.
