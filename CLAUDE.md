@@ -23,6 +23,7 @@ Single-file web game for Biology Standard 2.1, Chromosomes and Karyotyping (HS-L
 - `buildRound(lv)` – which items appear in Level 1 and Level 2 Prove It. `GQ` – each graded item type (points, hints, feedback). `BANK`, `SORT`, `VOCAB`, `CONN` (Connections groups), `CAT_QS` (Chromo Catapult), `INV_PAIRS` (Vocab Invaders).
 - `startProve`, `finishProve`, `makeCase`, `RENDER.case`, `RENDER.create` – Level 3 patient cases (1 point per diagnosis question) and the build-a-karyotype lab order (4/3/2/1 points by submission).
 - `final()`, `bestAtt`, `complete`, `CUTS`, `L3_MAX` – scoring. Finishing a level's Prove It at any score unlocks the next level; the best round per level (by points) counts. The final level exists only once all three are finished: overall % of best points, 80/60/40 cut-offs, then the hint cap. No NE before that.
+- `PACK_STAGES`, `packFrame`, `drawPack`, `PACK_LABELS`, `packCinema` – the Level 1 DNA packing animation: five scenes on one timeline (seconds), step controls in `LEARN[1][0].bind`, and the full-screen "Play full animation" view.
 - `NOTES` – My Notes entries; each unlocks when the lesson part with the matching `note` key is finished.
 - `HINT_MAX`, `hintCap`, `TIPS`, `HQ`, `hintFor` – Marty's hints and lesson tips. `martySVG`, `renderMarty`, `xaviMessage` – Marty the Mustang.
 - `CONDS`, `BODY`, `FEAT`, `featArt` – conditions, the Level 3 body map, and the trait illustrations.
