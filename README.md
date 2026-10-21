@@ -8,7 +8,7 @@ Students learn through short, gated lessons full of animations, games, and quick
 - **Level 2 · Technician:** Additionally, I can define a karyotype and explain how one is used to identify genetic traits.
 - **Level 3 · Cytogeneticist:** Additionally, I can create or interpret a karyotype to identify a genetic trait that may result.
 
-Includes My Notes (open-note notebook that unlocks as students learn), Marty the Mustang lab assistant with capped hints, an Arcade (Vocab Invaders, Chromo Catapult, Telomere Trouble, Chromo-Wordle, Connections), active-time tracking, and a credential report students screenshot and turn in on Google Classroom.
+Includes My Notes (open-note notebook that unlocks as students learn), Marty the Mustang lab assistant with capped hints, an Arcade (Vocab Invaders, Chromo Catapult, Telomere Trouble, Chromo-Wordle, Connections), active-time tracking, and a credential report students download as a PDF or PNG (with an optional webcam lab ID photo and Marty's signature) and turn in on Google Classroom.
 
 ## Hosting
 

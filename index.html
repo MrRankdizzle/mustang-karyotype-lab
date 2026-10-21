@@ -1248,6 +1248,7 @@ body.docked .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 .hintscale span{font-size:.82rem;color:var(--muted)}
 .turnin{border-top:6px solid var(--good);display:grid;gap:10px}.turnin h3{display:flex;gap:8px;align-items:center}.turnin h3 .ic{width:22px;height:22px;color:var(--good)}
 .turnin-steps{margin:0;padding-left:22px;display:grid;gap:8px}
+.dl-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.dl-row .btn{display:inline-flex;align-items:center;gap:8px}.dl-row .ic{width:18px;height:18px}
 kbd{font:600 .78rem var(--font-mono);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;background:var(--surface-2);color:var(--ink)}
 @media (max-width:860px){.lvgrid{grid-template-columns:1fr}.rulegrid{grid-template-columns:1fr 1fr}}
 @media (max-width:560px){.meet{grid-template-columns:1fr;justify-items:center}.meet .stack{justify-items:start}.hintscale{grid-template-columns:1fr}.rulegrid{grid-template-columns:1fr}}
@@ -2147,6 +2148,7 @@ const IC={
  replay:ic('<path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4.5h4.5"/>'),
  pause:ic('<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>'),
  dropper:ic('<path d="M15 4l5 5M17.5 6.5l-9 9-3.5 1 1-3.5 9-9"/><path d="M5 21c-1.2 0-2-.9-2-2 0-1.4 2-3.5 2-3.5s2 2.1 2 3.5c0 1.1-.8 2-2 2z" fill="currentColor"/>'),
+ download:ic('<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>'),
  camera:ic('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l2-3h4l2 3"/><circle cx="12" cy="13.5" r="3.5"/>'),
  eye:ic('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
  ban:ic('<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'),
@@ -3114,7 +3116,7 @@ SCREENS.intro=app=>{
   <div class="lightbox strip"><div class="strip-scan" aria-hidden="true"></div><div class="strip-in">${strip}</div></div>
   <div class="start"><div class="card stack">${S?`<div class="stack"><h2>Welcome back, ${esc(S.name)}</h2><p class="muted">Your progress is saved on this device.</p><div class="row"><button class="btn" id="cont" type="button">Back to the lab</button><button class="btn ghost" id="over" type="button">Start over as someone new</button></div><div id="confirm" hidden class="stack"><p>This erases ${esc(S.name)}’s progress on this device.</p><div class="row"><button class="btn" id="yes" type="button">Erase and start over</button><button class="btn ghost" id="no" type="button">Keep my progress</button></div></div></div>`:
   `<form id="nf"><label class="lab" for="tname">Trainee name (first and last)</label><div class="field-in"><input id="tname" autocomplete="name" placeholder="e.g. Jordan Vang"><button class="btn" type="submit">Clock in</button></div><p class="err" id="nerr" hidden>Enter your first and last name so your report counts.</p></form>`}</div>
-  <div class="stack">${[[IC.notes,'Learn','Work through short lesson parts full of games, animations, and quick checks. Your notes fill in as you go.'],[IC.target,'Prove it','Show what you know in an auto-graded round. You see your score right away.'],[IC.camera,'Turn it in','Screenshot your credential report and upload it to the Google Classroom assignment.']].map(([ic,t,d],i)=>`<div class="cred"><span class="cred-n">${ic}</span><div><h3>${i+1} · ${t}</h3><p>${d}</p></div></div>`).join('')}</div></div>
+  <div class="stack">${[[IC.notes,'Learn','Work through short lesson parts full of games, animations, and quick checks. Your notes fill in as you go.'],[IC.target,'Prove it','Show what you know in an auto-graded round. You see your score right away.'],[IC.camera,'Turn it in','Download your credential report as a PDF or picture and upload it to the Google Classroom assignment.']].map(([ic,t,d],i)=>`<div class="cred"><span class="cred-n">${ic}</span><div><h3>${i+1} · ${t}</h3><p>${d}</p></div></div>`).join('')}</div></div>
   <section class="howto"><div><p class="kicker">How scoring works</p><h2>How you earn each level</h2><p class="muted">Every level has a lesson, then a Prove It round. Go in order: finishing a level’s Prove It, at any score, unlocks the next lesson. Once you finish all three, your best points from each level add up to one final score.</p></div>
    <div class="lvgrid">${[[1,[`Finish the Trainee lesson (5 parts).`,`Finish the Prove It round: <b>${t1} points</b> possible.`]],[2,[`Finish the Level 1 Prove It first.`,`Finish the Technician lesson (7 parts).`,`Finish the Prove It round: <b>${t2} points</b> possible.`]],[3,[`Finish the Level 2 Prove It first.`,`Finish the Cytogeneticist lesson (3 parts).`,`Diagnose two patients: <b>1 point</b> per question, 6 per patient.`,`Build the lab-order karyotype: <b>4 points</b> on the first submission, then 3, 2, or 1.`]]].map(([l,req])=>`<article class="lvcard l${l}"><div class="lvc-top">${emblem(l,{size:46,state:'open'})}<div><span class="mono">Level ${l}</span><h3>${LVINFO[l].badge}</h3></div></div><p class="small">${LVINFO[l].ican}</p><p class="lvc-k mono">To complete it</p><ul>${req.map(r=>`<li>${r}</li>`).join('')}</ul></article>`).join('')}</div>
    <div class="card finalcard"><div><p class="lvc-k mono">Your final level</p><p class="small">Overall score = your best points from all three levels, out of <b>${tAll}</b> possible.</p></div>
@@ -3283,8 +3285,113 @@ function photoBooth(opener){
 // Marty signs the report once all three levels are finished; the horseshoe is his stamp
 const HOOF=`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M11 33V20a9 9 0 0 1 18 0v13" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>${[[11,29],[11,23],[29,29],[29,23],[13.5,15.5],[26.5,15.5]].map(([a,b])=>`<circle cx="${a}" cy="${b}" r="1.1" fill="var(--surface)"/>`).join('')}</svg>`;
 function martySig(done){
-  return done?`<div class="sig"><span class="kicker">Certified by</span><div class="sig-ink"><span class="sig-name">Marty the Mustang</span><svg class="sig-swash" viewBox="0 0 260 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16C60 6 120 22 176 12S242 4 256 9"/></svg><span class="sig-hoof">${HOOF}</span></div><div class="sig-who">${martySVG(26,{head:true})}<span><b>Marty the Mustang</b> · Lab Director, Mustang Karyotype Lab</span></div></div>`
+  return done?`<div class="sig"><span class="kicker">Certified by</span><div class="sig-ink"><span class="sig-name">Marty the Mustang</span><svg class="sig-swash" viewBox="0 0 260 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16C60 6 120 22 176 12S242 4 256 9"/></svg><span class="sig-hoof">${HOOF}</span></div><div class="sig-who">${martySVG(26,{head:true})}<span><b>Marty the Mustang</b> · Lab Assistant, Mustang Karyotype Lab</span></div></div>`
     :`<div class="sig wait"><span class="kicker">Certified by</span><div class="sig-ink"></div><div class="sig-who">${martySVG(26,{head:true})}<span>Marty signs this report once all three levels are finished.</span></div></div>`;
+}
+/* ---------- credential report as a file: the whole report drawn on one letter-width page, saved as a PNG or a PDF ---------- */
+// always printed in the light colors, whatever the screen theme
+const PAPER={bg:'#FFFFFF','surface':'#FFFFFF','surface-2':'#F4F8FB',ink:'#0F2133',muted:'#506679',line:'#D2DEE8',accent:'#4B9CD3','accent-ink':'#1C6BA4','accent-soft':'#DDEDF8',
+  good:'#1F7F4C','good-soft':'#DCF0E4',bad:'#B4412A',gold:'#9A6A12','gold-soft':'#F6EBD3',dna:'#4B3380'};
+const paperSVG=s=>{s=s.replace(/var\(--([a-z0-9-]+)\)/g,(m,k)=>PAPER[k]||PAPER.ink).replace(/currentColor/g,PAPER.gold);if(!/xmlns=/.test(s))s=s.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" ');
+  return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(s)})};
+const loadImg=src=>new Promise(res=>{if(!src)return res(null);const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src});
+async function reportCanvas(){
+  const FONT={d:"'Bricolage Grotesque','Segoe UI',system-ui,sans-serif",b:"'Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif",m:"'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace",sig:"'Mrs Saint Delafield',cursive"};
+  try{await Promise.race([Promise.all(["800 40px 'Bricolage Grotesque'","700 16px 'Bricolage Grotesque'","400 16px 'Atkinson Hyperlegible'","700 16px 'Atkinson Hyperlegible'","500 12px 'IBM Plex Mono'","600 12px 'IBM Plex Mono'","52px 'Mrs Saint Delafield'"].map(f=>document.fonts.load(f))),new Promise(r=>setTimeout(r,3000))])}catch(e){}
+  const F=final(),e=F.level,l3=bestAtt(3),est=[1,2,3].some(l=>(bestAtt(l)||{}).est);
+  const struggles=[...new Set([1,2,3].flatMap(l=>{const a=latest(l);return a?a.missed.map(m=>`L${l} · ${m}`):[]}))].slice(0,10);
+  const [photo,marty,hoof,...ems]=await Promise.all([loadImg(S.photo),paperSVG(martySVG(40,{head:true})),paperSVG(HOOF),...[1,2,3].map(l=>paperSVG(emblem(l,{size:64,state:complete(l)?'earned':'locked'})))]);
+  // page units: 850 wide (8.5 in), drawn at 3x; the page is at least letter height and grows if the report runs long
+  const W=850,K=3,M=56,cv=document.createElement('canvas');cv.width=W*K;cv.height=3200*K;const c=cv.getContext('2d');c.scale(K,K);
+  c.fillStyle=PAPER.bg;c.fillRect(0,0,W,3200);c.textBaseline='alphabetic';
+  const font=(w,sz,f)=>{c.font=`${w} ${sz}px ${FONT[f]}`};
+  const text=(t,x,y,{w=400,sz=14,f='b',col=PAPER.ink,al='left',sp=0}={})=>{font(w,sz,f);c.fillStyle=col;c.textAlign=al;if('letterSpacing' in c)c.letterSpacing=sp+'px';c.fillText(t,x,y);if('letterSpacing' in c)c.letterSpacing='0px'};
+  const wrap=(t,maxW,o={})=>{font(o.w||400,o.sz||14,o.f||'b');const out=[];let line='';String(t).split(/\s+/).forEach(wd=>{const tr=line?line+' '+wd:wd;if(c.measureText(tr).width>maxW&&line){out.push(line);line=wd}else line=tr});if(line)out.push(line);return out};
+  const para=(t,x,y,maxW,o={})=>{const lh=o.lh||(o.sz||14)*1.45;wrap(t,maxW,o).forEach((ln,i)=>text(ln,x,y+i*lh,o));return y+wrap(t,maxW,o).length*lh};
+  const rule=(y,col=PAPER.line)=>{c.fillStyle=col;c.fillRect(M,y,W-2*M,1)};
+  const rrect=(x,y,w,h,r)=>{c.beginPath();if(c.roundRect)c.roundRect(x,y,w,h,r);else c.rect(x,y,w,h)};
+  // header
+  c.fillStyle=PAPER.accent;c.fillRect(0,0,W,10);
+  text('MUSTANG KARYOTYPE LAB',M,46,{w:600,sz:12,f:'m',col:PAPER['accent-ink'],sp:1.5});
+  text('Credential report · Standard 2.1 · Chromosomes and Karyotyping (HS-LS3-1)',M,66,{sz:13,col:PAPER.muted});
+  const now=new Date();text(now.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})+' · '+now.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),W-M,46,{w:500,sz:12,f:'m',col:PAPER.muted,al:'right'});
+  rule(84);
+  // ring, name, statement, emblems, photo
+  let y=110;const rx=M+78,ry=y+82;
+  c.beginPath();c.arc(rx,ry,74,0,6.2832);c.fillStyle=PAPER['accent-soft'];c.fill();c.lineWidth=7;c.strokeStyle=F.done&&!e?PAPER.gold:PAPER.accent;c.stroke();
+  const big=F.done?(e?String(e):'NE'):(F.pct==null?'—':F.pct+'%'),sub=F.done?(e?'PROFICIENCY LEVEL':'NOT ENOUGH EVIDENCE'):'IN PROGRESS';
+  text(big,rx,ry+(F.done?16:12),{w:800,sz:F.done?(e?60:44):34,f:'d',col:PAPER['accent-ink'],al:'center'});
+  wrap(sub,110,{w:600,sz:9.5,f:'m'}).forEach((ln,i)=>text(ln,rx,ry+40+i*12,{w:600,sz:9.5,f:'m',col:PAPER['accent-ink'],al:'center',sp:.8}));
+  const tx=M+178,tw=W-M-tx-(photo?168:0);
+  text('TRAINEE',tx,y+14,{w:600,sz:11,f:'m',col:PAPER['accent-ink'],sp:1.4});
+  let ny=y+54;wrap(S.name,tw,{w:800,sz:36,f:'d'}).forEach(ln=>{text(ln,tx,ny,{w:800,sz:36,f:'d'});ny+=40});
+  ny=para(F.done?(e?`${LVINFO[e].badge}: ${LVINFO[e].ican}`:`${NE_TXT} Retake any level with new specimens to raise the score.`):`Final proficiency shows once all three levels are finished. ${F.n} of 3 done so far.`,tx,ny+4,tw,{sz:15.5,lh:22})+6;
+  ems.forEach((im,i)=>{const ex=tx+i*104;if(im)c.drawImage(im,ex,ny,44,44);text(LVINFO[i+1].badge,ex,ny+60,{w:500,sz:11,f:'m',col:PAPER.muted})});
+  ny+=82;
+  [`Overall: ${F.pct==null?'—':`${F.pts} / ${F.tot} points (${F.pct}%)`}`,`Active lab time: ${fmtTime(actT('total'))}`].forEach((t,i)=>text(t,tx,ny+i*19,{w:500,sz:12.5,f:'m',col:PAPER.muted}));
+  ny+=26;
+  if(photo){const px=W-M-150,py=y;c.save();rrect(px,py,150,184,12);c.fillStyle=PAPER['surface-2'];c.fill();c.lineWidth=1.5;c.strokeStyle=PAPER.line;c.stroke();c.clip();c.fillStyle=PAPER.accent;c.fillRect(px,py,150,24);c.restore();
+    text('LAB ID',px+75,py+16,{w:600,sz:10.5,f:'m',col:'#fff',al:'center',sp:2});c.save();rrect(px+13,py+34,124,124,10);c.clip();c.drawImage(photo,px+13,py+34,124,124);c.restore();
+    text(S.name.length>18?S.name.slice(0,17)+'…':S.name,px+75,py+174,{w:700,sz:11,col:PAPER.ink,al:'center'})}
+  y=Math.max(ny,y+(photo?200:180))+8;rule(y);y+=30;
+  // score table
+  const table=(cols,rows,{bold=[]}={})=>{const tw=W-2*M,ws=cols.map(cl=>cl[1]*tw),hs=cols.map((cl,i)=>wrap(cl[0].toUpperCase(),ws[i]-22,{w:600,sz:9.5,f:'m'}));const hh=Math.max(...hs.map(h=>h.length))*12+14;
+    c.fillStyle=PAPER['surface-2'];c.fillRect(M,y,tw,hh);let x=M;hs.forEach((h,i)=>{h.forEach((ln,j)=>text(ln,x+8,y+18+j*12,{w:600,sz:9.5,f:'m',col:PAPER.muted,sp:.5}));x+=ws[i]});y+=hh;
+    rows.forEach((r,ri)=>{let col=0;const cells=r.map(cell=>{const o=typeof cell==='object'?cell:{t:cell};const span=o.span||1,w=ws.slice(col,col+span).reduce((a,b)=>a+b,0);col+=span;return {...o,w,lines:wrap(o.t,w-14,{w:o.wt||400,sz:o.sz||12.5,f:o.f||'b'})}});
+      const rh=Math.max(...cells.map(cl=>cl.lines.length))*17+14;let x=M;
+      cells.forEach(cl=>{cl.lines.forEach((ln,j)=>text(ln,x+8,y+22+j*17,{w:cl.wt||400,sz:cl.sz||12.5,f:cl.f||'b',col:cl.col||PAPER.ink}));x+=cl.w});
+      y+=rh;c.fillStyle=PAPER.line;c.fillRect(M,y,tw,1)})};
+  const lvRows=[1,2,3].map(l=>{const L=S.lv[l],b=bestAtt(l);return [{t:`${l} · ${LVINFO[l].badge}`,wt:700},{t:b?'Complete':L.started?'In progress':'Not started',col:b?PAPER.good:PAPER.muted,wt:b?700:400},{t:b?`${b.score}/${b.total} (${pctOf(b)}%)${b.est?' est.':''}`:'—',f:'m',sz:11.5},{t:`${L.attempts.length} / ${L.started}`,f:'m',sz:11.5},{t:b?String(lvHints(l)):'—',f:'m',sz:11.5},{t:String(S.manual[l]),f:'m',sz:11.5},{t:`${actFmt(actT('l'+l+'learn'))} / ${actFmt(actT('l'+l+'prove'))}`,f:'m',sz:11.5}]});
+  lvRows.push([{t:'Overall',wt:700},{t:F.done?lvName(e):'In progress',wt:F.done?700:400,col:F.done?PAPER.ink:PAPER.muted},{t:F.pct==null?'—':`${F.pts}/${F.tot} (${F.pct}%)`,f:'m',sz:11.5,wt:600},{t:`${CUT_TXT}. Then the hint cap applies.`,span:4,sz:11,col:PAPER.muted}]);
+  table([['Level',.17],['Status',.13],['Best points',.14],['Rounds finished / started',.13],['Hints (counting round)',.11],['Notes or lesson peeks during Prove It',.15],['Active time (lesson / Prove It)',.17]],lvRows);
+  if(est){y+=8;y=para('est. = a Level 3 round from before points scoring, estimated as 6 points per solved case plus 4 for a lab order built in 2 tries or fewer.',M,y+10,W-2*M,{sz:11,col:PAPER.muted})}
+  const head=t=>{y+=34;text(t,M,y,{w:700,sz:17,f:'d'});y+=12};
+  if(l3&&l3.caseLog){head('Case log (best Level 3 round)');
+    table([['Patient',.14],['Karyotype',.15],['Student diagnosis',.25],['Result',.13],['Points',.1],['Mismatched placements (no points lost)',.23]],
+      [...l3.caseLog.map(cs=>[{t:cs.id,f:'m',sz:11.5},{t:cs.notation,f:'m',sz:11.5},cs.chosen,{t:cs.solved?'Solved':'Not solved',col:cs.solved?PAPER.good:PAPER.bad,wt:700},{t:cs.pts!=null?`${cs.pts}/${cs.max}`:'—',f:'m',sz:11.5},{t:String(cs.mistakes),f:'m',sz:11.5}]),
+       [{t:'Lab order',f:'m',sz:11.5},{t:`Built ${l3.createCond}`,span:2},{t:`${l3.createTries} submission${l3.createTries===1?'':'s'}`},{t:l3.createPts!=null?`${l3.createPts}/4`:'—',f:'m',sz:11.5},{t:'—',f:'m',sz:11.5}]])}
+  const hc=hintsCounted();head('Hints');
+  y=para(`${hc} of ${HINT_MAX} hints count toward this report (the hints from each level’s best round). ${hc<=2?'That keeps Level 3 within reach.':hc<=4?'That caps the final level at Level 2.':'That caps the final level at Level 1.'}${F.done&&F.byScore>e?` Without the hint cap, the score would show Level ${F.byScore}.`:''}`,M,y+12,W-2*M,{sz:13.5,lh:20});
+  head('Where I struggled (most recent rounds)');
+  if(struggles.length)struggles.forEach(t=>{y+=21;c.fillStyle=PAPER.ink;c.beginPath();c.arc(M+5,y-4.5,2.2,0,6.2832);c.fill();text(t,M+16,y,{sz:13.5})});else{y+=21;text('Nothing missed in the most recent rounds.',M,y,{sz:13.5,col:PAPER.muted})}
+  // Marty's signature
+  y+=34;rule(y);y+=28;text('CERTIFIED BY',M,y,{w:600,sz:11,f:'m',col:PAPER['accent-ink'],sp:1.4});
+  if(F.done){text('Marty the Mustang',M,y+56,{sz:50,f:'sig',col:PAPER['accent-ink']});font(400,50,'sig');const sw=c.measureText('Marty the Mustang').width;
+    c.beginPath();c.moveTo(M,y+70);c.bezierCurveTo(M+sw*.25,y+58,M+sw*.5,y+80,M+sw*.7,y+66);c.bezierCurveTo(M+sw*.85,y+58,M+sw*.98,y+60,M+sw+20,y+63);c.strokeStyle=PAPER.accent;c.lineWidth=2;c.lineCap='round';c.stroke();
+    if(hoof){c.save();c.translate(M+sw+58,y+38);c.rotate(-.25);c.globalAlpha=.9;c.drawImage(hoof,-24,-24,48,48);c.restore()}}
+  else{c.setLineDash([2,4]);c.strokeStyle=PAPER.line;c.lineWidth=2;c.beginPath();c.moveTo(M,y+62);c.lineTo(M+340,y+62);c.stroke();c.setLineDash([])}
+  y+=86;if(marty)c.drawImage(marty,M,y,28,29);
+  text(F.done?'Marty the Mustang':'Marty signs this report once all three levels are finished.',M+38,y+19,{w:F.done?700:400,sz:13,col:F.done?PAPER.ink:PAPER.muted});
+  if(F.done){font(700,13,'b');text('· Lab Assistant, Mustang Karyotype Lab',M+38+c.measureText('Marty the Mustang').width+6,y+19,{sz:13,col:PAPER.muted})}
+  y+=60;const H=Math.max(1100,Math.ceil(y+30));
+  text(`Downloaded from Mustang Karyotype Lab · ${now.toLocaleString()}`,W/2,H-28,{sz:10.5,col:PAPER.muted,al:'center'});
+  const out=document.createElement('canvas');out.width=W*K;out.height=H*K;const o=out.getContext('2d');o.fillStyle=PAPER.bg;o.fillRect(0,0,out.width,out.height);o.drawImage(cv,0,0,out.width,out.height,0,0,out.width,out.height);
+  return out;
+}
+// a one-page PDF around a JPEG of the report, written by hand so no library is needed
+function jpegPDF(jpg,iw,ih){
+  const enc=new TextEncoder(),parts=[],offs=[];let len=0;const pw=612,ph=+(612*ih/iw).toFixed(2);
+  const push=x=>{const b=typeof x==='string'?enc.encode(x):x;parts.push(b);len+=b.length};
+  const obj=(n,dict,stream)=>{offs[n]=len;push(`${n} 0 obj\n${dict}\n`);if(stream){push('stream\n');push(stream);push('\nendstream\n')}push('endobj\n')};
+  const draw=enc.encode(`q ${pw} 0 0 ${ph} 0 0 cm /Im0 Do Q`);
+  push('%PDF-1.4\n');
+  obj(1,'<< /Type /Catalog /Pages 2 0 R >>');obj(2,'<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
+  obj(3,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`);
+  obj(4,`<< /Type /XObject /Subtype /Image /Width ${iw} /Height ${ih} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>`,jpg);
+  obj(5,`<< /Length ${draw.length} >>`,draw);
+  obj(6,`<< /Title (Credential report) /Producer (Mustang Karyotype Lab) >>`);
+  const xref=len;push(`xref\n0 7\n0000000000 65535 f \n${[1,2,3,4,5,6].map(n=>String(offs[n]).padStart(10,'0')+' 00000 n \n').join('')}trailer\n<< /Size 7 /Root 1 0 R /Info 6 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  return new Blob(parts,{type:'application/pdf'});
+}
+async function downloadReport(kind,btn){
+  const btns=$$('[data-dl]');btns.forEach(b=>b.disabled=true);const lab=btn&&$('span',btn),was=lab&&lab.textContent;if(lab)lab.textContent='Preparing…';
+  try{const cv=await reportCanvas();
+    const blob=kind==='pdf'?jpegPDF(new Uint8Array(await (await new Promise(r=>cv.toBlob(r,'image/jpeg',.9))).arrayBuffer()),cv.width,cv.height):await new Promise(r=>cv.toBlob(r,'image/png'));
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Credential-Report-${(S.name||'Student').trim().replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'')||'Student'}.${kind}`;
+    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},5000);
+    toast(`Report saved as a ${kind.toUpperCase()} in your Downloads folder.`,4000)}
+  catch(err){toast('The download didn’t work on this computer. Try the other format, or use Copy report as text.',5000)}
+  finally{btns.forEach(b=>b.disabled=false);if(lab)lab.textContent=was}
 }
 SCREENS.report=app=>{
   if(!S)return go('intro');
@@ -3302,15 +3409,15 @@ SCREENS.report=app=>{
   <div class="card hintcard"><h3>Hints</h3><p>${hintsCounted()} of ${HINT_MAX} hints count toward this report (the hints from each level’s best round). ${hintsCounted()<=2?'That keeps Level 3 within reach.':hintsCounted()<=4?'That caps the final level at Level 2.':'That caps the final level at Level 1.'}${F.done&&F.byScore>e?` Without the hint cap, the score would show Level ${F.byScore}.`:''}</p></div>
   <div class="card"><h3>Where I struggled (most recent rounds)</h3>${struggles.length?`<ul class="misslist" style="margin-top:8px">${struggles.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`:'<p class="muted" style="margin-top:6px">Nothing missed in the most recent rounds.</p>'}</div>
   <div class="row"><button class="btn" id="copy" type="button">Copy report as text</button><button class="btn ghost" id="hub" type="button">Back to shift board</button></div>
-  <div class="card turnin"><h3>${IC.camera} Turn in your evidence</h3><ol class="turnin-steps">
-   <li><b>Scroll to the top</b> of this report so your name, proficiency level, and score table all show on screen.</li>
-   <li><b>Take a screenshot.</b> <span class="small muted">Chromebook: <kbd>Ctrl</kbd> + <kbd>Show windows</kbd> (or add <kbd>Shift</kbd> to grab part of the screen). Windows: <kbd>Win</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd>. Mac: <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>4</kbd>. iPad: top button + volume up.</span></li>
-   <li><b>Open the Google Classroom assignment</b> for Standard 2.1. Under <i>Your work</i>, choose <b>+ Add or create</b>, then <b>File</b>, and upload your screenshot.</li>
-   <li><b>Click Turn in.</b> Your screenshot is your evidence of completion and mastery.</li></ol>
-   <p class="small muted">If you retake a level later and do better, take a new screenshot and add it to the same assignment.</p></div>
+  <div class="card turnin"><h3>${IC.download} Turn in your evidence</h3><ol class="turnin-steps">
+   <li><b>Download your report.</b> It saves the whole report, top to bottom, to your Downloads folder. Choose either one.<div class="dl-row"><button class="btn" type="button" data-dl="pdf">${IC.download}<span>Download PDF</span></button><button class="btn ghost" type="button" data-dl="png">${IC.download}<span>Download PNG picture</span></button></div></li>
+   <li><b>Open the Google Classroom assignment</b> for Standard 2.1. Under <i>Your work</i>, choose <b>+ Add or create</b>, then <b>File</b>, and upload the report from your Downloads folder.</li>
+   <li><b>Click Turn in.</b> Your report is your evidence of completion and mastery.</li></ol>
+   <p class="small muted">If you retake a level later and do better, download a new report and add it to the same assignment.</p></div>
   <textarea id="rtxt" class="sr" aria-hidden="true" tabindex="-1"></textarea></section>`;
   $('#hub').onclick=()=>go('hub');
   $('#photoBtn').onclick=e=>photoBooth(e.currentTarget);
+  $$('[data-dl]').forEach(b=>b.onclick=()=>downloadReport(b.dataset.dl,b));
   {const d=$('#photoDel');if(d)d.onclick=()=>{delete S.photo;save();render();toast('Photo removed.')}}
   $('#copy').onclick=()=>{const txt=reportText();const done=()=>toast('Report copied. Paste it into your assignment.');
     const fallback=()=>{const ta=$('#rtxt');ta.value=txt;ta.classList.remove('sr');ta.style.cssText='width:100%;min-height:200px;font:0.9rem var(--font-mono)';ta.removeAttribute('aria-hidden');ta.select();toast('Press Ctrl+C (or ⌘+C) to copy the selected text.')};
