@@ -151,6 +151,16 @@ td.mono{white-space:nowrap}
 .morph{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:22px;align-items:center}
 @media (max-width:760px){.morph{grid-template-columns:1fr}}
 .morph canvas{width:100%;aspect-ratio:1;display:block;border-radius:16px;background:var(--surface-2);border:1px solid var(--line);max-width:360px;margin:0 auto}
+.mfig{display:grid;gap:10px;width:100%;max-width:360px;margin:0 auto}
+.msteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.msteps li{position:relative;padding-top:10px;text-align:center;font:600 .62rem/1.15 var(--font-mono);color:var(--muted);transition:color .3s}
+.msteps li::before{content:'';position:absolute;top:0;left:1px;right:1px;height:4px;border-radius:2px;background:var(--line);transition:background .3s}
+.msteps li.done::before{background:color-mix(in srgb,var(--dna) 40%,var(--line))}
+.msteps li.on{color:var(--ink)}
+.msteps li.on::before{background:var(--dna)}
+@media (max-width:520px){.msteps li{font-size:0;padding-top:4px}}
+.mcap{margin:0;min-height:4.2em;font-size:.92rem;line-height:1.4}
+.mcap b{display:block;font:700 1.05rem/1.2 var(--font-display);color:var(--dna)}
 .stage{font:800 1.5rem/1.1 var(--font-display)}
 .stage small{display:block;font:600 .75rem/1.4 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:4px}
 input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
@@ -453,17 +463,19 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .ep-scale i{display:block;width:44px;height:3px;background:var(--lightbox-ink)}
 .ep-label{position:absolute;left:50%;top:9%;transform:translateX(-50%);font:600 .6rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--lightbox-ink);opacity:.7;white-space:nowrap}
 .zoom{display:flex;align-items:flex-start;justify-content:center;gap:4px;flex-wrap:wrap;padding:6px 0}
-.zp{margin:0;display:grid;justify-items:center;gap:8px;width:118px;animation:rise .6s ease-out backwards;animation-delay:calc(var(--i)*.12s)}
-.zc{width:104px;height:104px;border-radius:50%;background:var(--surface);border:2px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;overflow:hidden;transition:transform .2s}
-.zp:hover .zc{transform:scale(1.07)}
+.zp{margin:0;display:grid;justify-items:center;gap:8px;width:118px;animation:zrise .9s ease-out backwards;animation-delay:calc(var(--i)*.15s)}
+.zc{width:104px;height:104px;border-radius:50%;background:var(--surface);border:2px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;overflow:hidden;transition:transform .6s ease}
+.zp:hover .zc{transform:scale(1.025)}
 .zc svg{width:88%;height:88%}
 .zp figcaption{display:grid;justify-items:center;text-align:center;gap:2px}
 .zp figcaption b{font:700 .95rem/1.1 var(--font-display)}
 .zp figcaption span{font:500 .72rem/1.2 var(--font-mono);color:var(--muted)}
 .zarrow{font:800 1.8rem/104px var(--font-display);color:var(--accent)}
 @media (max-width:640px){.zarrow{display:none}.zp{width:96px}.zc{width:84px;height:84px}}
-.helix-move{animation:helix 3s linear infinite}
-@keyframes helix{to{transform:translateX(-50px)}}
+/* the strip stays calm: a slow few-pixel sway for the helix, a soft fade-in for each circle */
+.zhelix{animation:zsway 14s ease-in-out infinite alternate}
+@keyframes zsway{from{transform:translateX(0)}to{transform:translateX(-6px)}}
+@keyframes zrise{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .mat{--chr-body:var(--mom-body);--chr-edge:var(--mom-edge)}
 .pat{--chr-body:var(--dad-body);--chr-edge:var(--dad-edge)}
@@ -1324,6 +1336,125 @@ function drawMorph(cv,M,t,time,still){
   layers.forEach((L,l)=>{ctx.globalAlpha=1-(3-l)*.2*e;ctx.stroke(L)});ctx.globalAlpha=1;
 }
 function paintMicros(root){requestAnimationFrame(()=>{$$('canvas.micro',root).forEach(cv=>drawMorph(cv,makeMorph(+cv.dataset.seed),+cv.dataset.t,0,true));$$('canvas.cellcv',root).forEach(cv=>drawCell(cv,+cv.dataset.st,+cv.dataset.seed))})}
+/* ---------- DNA packing levels (Level 1 slider): helix → nucleosomes → fiber → supercoiled loops → chromosome ---------- */
+// One continuous zoom-out. The close-up scenes are built in nanometres around the origin (real DNA wrapped on histones);
+// the long fiber that condenses into the X uses chromosome units (1 unit = 3000 nm), so the two scales line up at the handoff.
+const PACK_STAGES=[
+ {t:0,name:'DNA',say:'Zoomed all the way in, DNA is a double helix: two strands joined by base pairs, like a twisted ladder.'},
+ {t:.15,name:'Nucleosomes',say:'The DNA wraps around clusters of histone proteins, like thread on spools. Each spool is a nucleosome.'},
+ {t:.37,name:'Chromatin fiber',say:'The nucleosomes coil into a thicker fiber. In a working cell, this loose fiber fills the nucleus.'},
+ {t:.66,name:'Supercoiled',say:'The fiber folds into loops, and the loops coil up tighter and tighter.'},
+ {t:.86,name:'Chromosome',say:'Fully packed: two identical sister chromatids joined at the centromere.'}];
+const packStage=t=>PACK_STAGES.reduce((a,s,i)=>t>=s.t?i:a,0);
+const sstep=(a,b,x)=>{x=Math.min(1,Math.max(0,(x-a)/(b-a)));return x*x*(3-2*x)};
+const PACKS={};
+function makePack(seed){
+  if(PACKS[seed])return PACKS[seed];
+  const rng=mulberry32(seed),half=2000,mid=half>>1,A=[],D=[],B=[];
+  // loose chromatin: two tangled copies; copy 0 leaves the centre heading right, so the close-up fiber runs straight into it
+  for(let k=0;k<2;k++){const W=[];
+    const walk=(dir,x,y,ang)=>{for(let i=mid+dir,n=0;i>=0&&i<half;i+=dir,n++){if(n>3)ang+=(rng()-.5)*1.5*Math.min(1,(n-3)/6);x+=Math.cos(ang)*.026;y+=Math.sin(ang)*.026;const d=Math.hypot(x,y);if(d>.86){ang+=Math.PI*.8;x*=.86/d;y*=.86/d}W[i]=[x,y]}};
+    const x=k?(rng()-.5)*.9:0,y=k?(rng()-.5)*.9:0,a=k?rng()*6.28:0;W[mid]=[x,y];walk(1,x,y,a);walk(-1,x,y,a+Math.PI);A.push(...W)}
+  for(let k=0;k<2;k++){const side=k?1:-1;let ox=0,oy=0;
+    const bumps=Array.from({length:8},()=>[rng(),.006+rng()*.014,.4+rng()*.9]);
+    for(let i=0;i<half;i++){const s=i/(half-1),y=-.8+s*1.6,yc=-.12,dist=Math.abs(y-yc);
+      const ph=s*Math.PI*2*76+Math.sin(s*31+k*5)*.9;
+      ox+=(rng()-.5)*.007;oy+=(rng()-.5)*.005;ox*=.9;oy*=.9;
+      let bump=0;for(const [c,w,st] of bumps){const d=s-c;bump+=st*Math.exp(-d*d/(w*w))}
+      const tip=Math.min(1,(1-Math.abs(2*s-1))*9),pinch=.55+.45*Math.min(1,dist*7);
+      const amp=.07*tip*pinch*(1+.2*Math.sin(s*47+k*3)+.55*bump);
+      B.push([side*(.058+dist*.3)+Math.sin(ph)*amp+Math.sin(ph*3.1+k)*.012*tip+ox,y+Math.cos(ph)*.012*(1+bump)+Math.cos(ph*2.6)*.006+oy,(Math.cos(ph)+1)/2]);
+      // supercoiled: the same coil, but looser, with big loops and arms not yet pulled in
+      D.push([side*(.1+dist*.3)+Math.sin(ph)*(amp*1.9+.02*tip)+ox*2,yc+(y-yc)*1.12+Math.cos(ph)*(.03+.02*bump)*tip+oy*2])}}
+  return PACKS[seed]={A,B,D,half,mid};
+}
+// nucleosomes along the close-up DNA: zig-zag offsets for the beads, and each one's angle around the coiled fiber
+const NUC=(()=>{const r=mulberry32(5),a=[];for(let j=-60;j<=60;j++)a.push({j,zz:(j&1?1:-1)*(2.2+r()*1.6),zb:(r()-.5)*6,ps:j*Math.PI/3+(r()-.5)*.3});return a})();
+function packNW(ctx,t,time,W,H,k,alpha,col){
+  const cx=W/2,cy=H/2,R=4.2,HP=-2.8,RF=9.5,ct=Math.cos(.5),st=Math.sin(.5),NB=16;
+  const wf=sstep(.11,.31,t),tau=1.65*wf,fc=sstep(.34,.49,t),ca=sstep(.09,.17,t),spin=time*.0005;
+  const helixA=sstep(2.5,4.5,k),rungA=sstep(7,14,k)*helixA,zr=1.2+6*wf+(15.5-1.2-6*wf)*fc;
+  const proj=p=>[cx+p[0]*k,cy-(p[1]*ct-p[2]*st)*k,p[1]*st+p[2]*ct];
+  const add=(p,q,m)=>[p[0]+q[0]*m,p[1]+q[1]*m,p[2]+q[2]*m];
+  const bk=z=>Math.max(0,Math.min(NB-1,Math.floor((z/zr*.5+.5)*NB)));
+  const L=Array.from({length:NB},()=>({s1:new Path2D(),s2:new Path2D(),ra:new Path2D(),rb:new Path2D(),tu:new Path2D(),sp:new Path2D(),hl:new Path2D()}));
+  const vis=(x0,y0,x1,y1)=>x1>-20&&x0<W+20&&y1>-20&&y0<H+20;
+  // each histone core: where it sits, and its wrapping frame (e1, e2 span the wrap; a is the core's axis)
+  const cores=NUC.map(n=>{const th=fc*n.ps,c=Math.cos(th),s=Math.sin(th),xb=n.j*(60-36*wf),yl=R*(1-wf)+n.zz*wf,zl=n.zb*wf,y0=yl+(RF-yl)*fc,z0=zl*(1-fc);
+    const o={C:[xb+(n.j*1.85-xb)*fc,y0*c-z0*s,y0*s+z0*c],e1:[1,0,0],e2:[0,c,s],a:[0,-s,c]};
+    o.at=th=>add(add(add(o.C,o.e1,R*Math.sin(th)),o.e2,-R*Math.cos(th)),o.a,HP*(th/6.2832-tau/2));
+    o.tan=th=>{const v=add(add(o.e1.map(q=>q*Math.cos(th)),o.e2,Math.sin(th)),o.a,HP/(6.2832*R));const m=Math.hypot(...v);return v.map(q=>q/m)};
+    o.inP=o.at(0);o.inT=o.tan(0);o.outP=o.at(6.2832*tau);o.outT=o.tan(6.2832*tau);return o});
+  // the DNA path, as pieces: lead-in, then linker + wrap for each core, then lead-out
+  const pieces=[],wl=tau*Math.hypot(6.2832*R,HP);let mi=0;
+  const herm=(p0,t0,p1,t1)=>{const ch=Math.hypot(p1[0]-p0[0],p1[1]-p0[1],p1[2]-p0[2]),m=ch*.75;return {len:ch*1.08,f:u=>{const u2=u*u,u3=u2*u,h1=2*u3-3*u2+1,h2=u3-2*u2+u,h3=-2*u3+3*u2,h4=u3-u2;return [0,1,2].map(i=>h1*p0[i]+h2*t0[i]*m+h3*p1[i]+h4*t1[i]*m)}}};
+  const c0=cores[0],cN=cores[cores.length-1];
+  pieces.push({len:100,f:u=>add(c0.inP,[1,0,0],-100*(1-u))});
+  cores.forEach((c,i)=>{if(i){const p=cores[i-1];pieces.push(herm(p.outP,p.outT,c.inP,c.inT))}if(i===60)mi=pieces.length;if(wl>.01)pieces.push({len:wl,f:u=>c.at(u*6.2832*tau),core:c})});
+  pieces.push({len:100,f:u=>add(cN.outP,[1,0,0],100*u)});
+  // arc length measured from where the DNA enters the middle nucleosome, so the centre of the picture stays put
+  let s0=0;for(let i=0;i<mi;i++)s0-=pieces[i].len;
+  const step=helixA>0?2.5:5,rp=k,sw=Math.min(5,Math.max(.8,.36*k)),rw=Math.min(3.4,Math.max(.6,.2*k));
+  let s=s0;
+  for(const pc of pieces){const len=pc.len,a=proj(pc.f(0)),m=proj(pc.f(.5)),b=proj(pc.f(1)),pad=(pc.core?R+2:len*.4)*k;
+    if(!vis(Math.min(a[0],m[0],b[0])-pad,Math.min(a[1],m[1],b[1])-pad,Math.max(a[0],m[0],b[0])+pad,Math.max(a[1],m[1],b[1])+pad)){s+=len;continue}
+    const n=Math.max(2,Math.min(900,Math.ceil(len*k/step))),pts=[];
+    for(let i=0;i<=n;i++){const q=proj(pc.f(i/n));q.push(s+len*i/n);pts.push(q)}
+    let p1,p2,pz1,pz2;
+    for(let i=0;i<=n;i++){const q=pts[i],A=pts[Math.max(0,i-1)],Bq=pts[Math.min(n,i+1)];let tx=Bq[0]-A[0],ty=Bq[1]-A[1];const tl=Math.hypot(tx,ty)||1;tx/=tl;ty/=tl;
+      if(i&&helixA<1){const b=L[bk((q[2]+pts[i-1][2])/2)].tu;b.moveTo(pts[i-1][0],pts[i-1][1]);b.lineTo(q[0],q[1])}
+      if(helixA>0){const ph=6.2832*q[3]/3.4+spin,o1=rp*Math.cos(ph),o2=rp*Math.cos(ph+2.3),n1=[q[0]-ty*o1,q[1]+tx*o1],n2=[q[0]-ty*o2,q[1]+tx*o2],z1=q[2]+Math.sin(ph),z2=q[2]+Math.sin(ph+2.3);
+        if(i){let b=L[bk((z1+pz1)/2)].s1;b.moveTo(p1[0],p1[1]);b.lineTo(n1[0],n1[1]);b=L[bk((z2+pz2)/2)].s2;b.moveTo(p2[0],p2[1]);b.lineTo(n2[0],n2[1]);
+          if(rungA>0&&Math.floor(q[3]/.34)!==Math.floor(pts[i-1][3]/.34)){const mx=(n1[0]+n2[0])/2,my=(n1[1]+n2[1])/2,l=L[bk(q[2])];l.ra.moveTo(n1[0],n1[1]);l.ra.lineTo(mx,my);l.rb.moveTo(mx,my);l.rb.lineTo(n2[0],n2[1])}}
+        p1=n1;p2=n2;pz1=z1;pz2=z2}}
+    s+=len}
+  // histone cores: eight round proteins each (they grow in as the cluster assembles), or one bead when too small to tell apart
+  const big=1.75*k>=1.8;
+  if(ca>0)cores.forEach(c=>{const q=proj(c.C);if(!vis(q[0]-6*k,q[1]-6*k,q[0]+6*k,q[1]+6*k))return;
+    const balls=big?[0,1,2,3,4,5,6,7].map(m=>{const b=m*1.5708+(m>3?.785:0),r=1.6;return add(add(add(c.C,c.e1,r*Math.cos(b)),c.e2,r*Math.sin(b)),c.a,m>3?.95:-.95)}):[c.C];
+    const rr=(big?1.75:3.4)*k*ca;balls.forEach(p=>{const q=proj(p),l=L[bk(q[2])];l.sp.moveTo(q[0]+rr,q[1]);l.sp.arc(q[0],q[1],rr,0,6.2832);l.hl.moveTo(q[0]-.32*rr+.42*rr,q[1]-.36*rr);l.hl.arc(q[0]-.32*rr,q[1]-.36*rr,.42*rr,0,6.2832)})});
+  const dna=col('--dna'),c2=col('--accent-ink'),gold=col('--gold'),bg=col('--nucleus');
+  ctx.lineCap='round';ctx.lineJoin='round';
+  L.forEach((l,i)=>{const dA=alpha*(.42+.58*i/(NB-1));
+    if(helixA<1){ctx.globalAlpha=dA*(1-helixA);ctx.strokeStyle=dna;ctx.lineWidth=Math.max(.8,2*k);ctx.stroke(l.tu)}
+    if(helixA>0){ctx.globalAlpha=dA*helixA;ctx.lineWidth=sw;ctx.strokeStyle=dna;ctx.stroke(l.s1);ctx.strokeStyle=c2;ctx.stroke(l.s2)}
+    if(rungA>0){ctx.globalAlpha=dA*rungA;ctx.lineWidth=rw;ctx.strokeStyle=col('--accent');ctx.stroke(l.ra);ctx.strokeStyle=col('--mark');ctx.stroke(l.rb)}
+    if(ca>0){ctx.globalAlpha=alpha;ctx.fillStyle=gold;ctx.fill(l.sp);ctx.strokeStyle=bg;ctx.lineWidth=Math.max(.5,.12*k*ca);ctx.stroke(l.sp);ctx.globalAlpha=alpha*.3;ctx.fillStyle='#fff';ctx.fill(l.hl)}});
+  ctx.globalAlpha=1;
+}
+function packRope(ctx,M,t,cx,cy,P,alpha,stroke){
+  const g2=sstep(.76,.92,t),far=sstep(.565,.615,t),q=(sstep(.62,.77,t)+g2)/2;
+  // starts as thick as the close-up fiber looks (about 22 nm), ends as the thread of the X
+  ctx.strokeStyle=stroke;ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=Math.max(.8,(.0075+.0023*g2)*P);
+  // [near the close-up fiber, everything else] × four depth layers, so the back of each coil fades as the DNA condenses
+  const L=[0,1].map(()=>[new Path2D(),new Path2D(),new Path2D(),new Path2D()]);
+  for(let k=0;k<2;k++){let px=0,py=0,mx=0,my=0;
+    for(let i=0;i<M.half;i++){const j=k*M.half+i,a=M.A[j],d=M.D[j],b=M.B[j],u=Math.abs(i/M.half-.5)*2,g1=sstep(.62+.05*u,.72+.05*u,t);
+      let x=a[0]+(d[0]-a[0])*g1,y=a[1]+(d[1]-a[1])*g1;x+=(b[0]-x)*g2;y+=(b[1]-y)*g2;const X=cx+x*P,Y=cy+y*P;
+      if(i){const nx=(px+X)/2,ny=(py+Y)/2;if(i>1){const p=L[k===0&&Math.abs(i-M.mid)<12?0:1][q?Math.min(3,Math.floor(M.B[j-1][2]*4)):3];p.moveTo(mx,my);p.quadraticCurveTo(px,py,nx,ny)}mx=nx;my=ny}
+      px=X;py=Y}}
+  L.forEach((ls,n)=>ls.forEach((p,l)=>{ctx.globalAlpha=alpha*(n?far:1)*(1-(3-l)*.2*q);ctx.stroke(p)}));ctx.globalAlpha=1;
+}
+function drawPack(cv,t,time){
+  const ctx=cv.getContext('2d');const dpr=window.devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
+  if(cv.width!==Math.round(w*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  const css=getComputedStyle(document.documentElement),col=n=>css.getPropertyValue(n).trim();
+  const half=Math.min(w,h)/2,cx=w/2,cy=h/2;
+  // camera: how many nanometres fit in half the frame, eased in log space between resting zooms
+  const Z=[[0,4.2],[.06,4.2],[.27,34],[.33,34],[.47,44],[.63,3409],[1,3409]];let zi=0;while(zi<Z.length-2&&t>Z[zi+1][0])zi++;
+  const [t0,z0]=Z[zi],[t1,z1]=Z[zi+1],k=half/Math.exp(Math.log(z0)+Math.log(z1/z0)*sstep(t0,t1,t)),P=k*3000;
+  const nucA=1-sstep(.66,.84,t);
+  if(nucA>0){ctx.globalAlpha=nucA;ctx.fillStyle=col('--nucleus');const nr=1.02*P;
+    if(nr>half*3)ctx.fillRect(0,0,w,h);else{ctx.strokeStyle=col('--nucleus-edge');ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,nr,0,6.2832);ctx.fill();ctx.stroke()}ctx.globalAlpha=1}
+  const ropeA=sstep(.53,.57,t),nwA=1-sstep(.545,.595,t);
+  if(ropeA>0)packRope(ctx,makePack(7),t,cx,cy,P,ropeA,col('--dna'));
+  if(nwA>0)packNW(ctx,t,time,w,h,k,nwA,col);
+  const lab=sstep(.9,.97,t);
+  if(lab>0){const fs=Math.max(11,Math.round(half*.068));ctx.globalAlpha=lab;ctx.font=`600 ${fs}px ${col('--font-mono')}`;ctx.fillStyle=col('--ink');ctx.strokeStyle=col('--muted');ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.moveTo(cx+.14*P,cy-.12*P);ctx.lineTo(cx+.3*P,cy-.12*P);ctx.moveTo(cx-.12*P,cy+.86*P);ctx.lineTo(cx-.26*P,cy+.76*P);ctx.moveTo(cx+.12*P,cy+.86*P);ctx.lineTo(cx+.26*P,cy+.76*P);ctx.stroke();
+    ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillText('Centromere',cx+.33*P,cy-.12*P);ctx.textAlign='center';ctx.fillText('Sister chromatids',cx,cy+.95*P);ctx.globalAlpha=1}
+}
 /* ---------- realistic cell micrographs: 0 chromatin · 1 condensing · 2 chromosomes ---------- */
 function drawCell(cv,stage,seed){
   const w=cv.clientWidth;if(!w)return;const dpr=window.devicePixelRatio||1;cv.width=Math.round(w*dpr);cv.height=Math.round(w*dpr);
@@ -1504,7 +1635,7 @@ const noteChr=(id,o={})=>chrSVG(id,{scale:.5,w:16,...o});
 const NOTES=[
  {k:'pack',lv:1,page:0,from:'Pack it up',t:'DNA has a packing problem',
   art:()=>`<div class="nt-pair"><figure><canvas class="micro mini" data-t="0" data-seed="11" aria-hidden="true"></canvas><figcaption>Chromatin</figcaption></figure><span class="nt-arrow" aria-hidden="true">→</span><figure><canvas class="micro mini" data-t="1" data-seed="11" aria-hidden="true"></canvas><figcaption>Chromosome</figcaption></figure></div>`,
-  pts:['About 2 meters of DNA fits in a nucleus 6 micrometers wide.','<b>Chromatin</b> = loose DNA. The cell can read its genes.','<b>Chromosome</b> = DNA coiled tight before a cell divides, so it can move without tangling.']},
+  pts:['About 2 meters of DNA fits in a nucleus 6 micrometers wide.','DNA wraps around <b>histone</b> proteins like thread on spools. Each spool is a <b>nucleosome</b>.','<b>Chromatin</b> = loose DNA wrapped on histones. The cell can read its genes.','<b>Chromosome</b> = chromatin coiled tight before a cell divides, so it can move without tangling.']},
  {k:'count',lv:1,page:0,from:'46 pieces',t:'46 chromosomes, 23 pairs',art:eggSpermNote,
   pts:['Egg brings 23 chromosomes, sperm brings 23.','Every human body cell has <b>46</b>, in <b>23 pairs</b>.','Egg and sperm cells have only 23.']},
  {k:'species',lv:1,page:0,from:'Every species has its own number',t:'Every species has its own number',
@@ -1844,7 +1975,7 @@ function zoomStrip(){
   const chrom=`<svg viewBox="0 0 100 100">${coilX(50,50,74,12,{turns:26,amp:4.6,sw:1.3,seed:21})}</svg>`;
   let s1='',s2='',rungs='';for(let x=-50;x<=150;x+=2){const y1=50+17*Math.sin(x/50*6.283),y2=50-17*Math.sin(x/50*6.283);s1+=(x>-50?'L':'M')+x+','+y1.toFixed(1);s2+=(x>-50?'L':'M')+x+','+y2.toFixed(1)}
   for(let x=-50;x<=150;x+=6.25){const y1=50+17*Math.sin(x/50*6.283),y2=50-17*Math.sin(x/50*6.283);if(Math.abs(y1-y2)>5)rungs+=`<line x1="${x}" x2="${x}" y1="${y1.toFixed(1)}" y2="${(y1+y2)/2}" stroke="var(--accent)" stroke-width="2.6"/><line x1="${x}" x2="${x}" y1="${(y1+y2)/2}" y2="${y2.toFixed(1)}" stroke="var(--mark)" stroke-width="2.6"/>`}
-  const dna=`<svg viewBox="0 0 100 100"><defs><clipPath id="zc-dna"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#zc-dna)"><g class="helix-move">${rungs}<path d="${s1}" fill="none" stroke="var(--dna)" stroke-width="3.2"/><path d="${s2}" fill="none" stroke="var(--accent-ink)" stroke-width="3.2"/></g></g></svg>`;
+  const dna=`<svg viewBox="0 0 100 100"><defs><clipPath id="zc-dna"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#zc-dna)"><g class="zhelix">${rungs}<path d="${s1}" fill="none" stroke="var(--dna)" stroke-width="3.2"/><path d="${s2}" fill="none" stroke="var(--accent-ink)" stroke-width="3.2"/></g></g></svg>`;
   const P=[['You','37 trillion cells',person],['One cell','0.01 mm wide',cell],['Its nucleus','6 µm wide',nucleus],['Chromosome','46 per cell',chrom],['DNA','2 nm wide, 2 m long',dna]];
   return `<div class="zoom">${P.map((p,i)=>`${i?'<span class="zarrow" aria-hidden="true">›</span>':''}<figure class="zp" style="--i:${i}"><div class="zc">${p[2]}</div><figcaption><b>${p[0]}</b><span>${p[1]}</span></figcaption></figure>`).join('')}</div>`;
 }
@@ -2528,21 +2659,32 @@ const LEARN={
 1:[
  {title:'The packing problem',html:()=>SEC('Pack it up',`<p>Each of your cells holds about 2 meters of DNA in a nucleus 6 micrometers wide. That’s like stuffing 40 kilometers of thread into a tennis ball.</p>
   ${zoomStrip()}
-  ${ACT('Drag the slider','How does it fit? The cell changes how tightly the DNA is packed. Drag the slider all the way to “Ready to divide.”',`<div class="morph"><canvas id="mc" role="img" aria-label="Animation of DNA condensing from chromatin into a chromosome"></canvas><div class="stack"><div class="stage" id="stage"></div><p id="stageText"></p><div><label for="cond" class="lab">Get the cell ready to divide</label><input type="range" id="cond" min="0" max="100" value="0"><div class="range-ends"><span>Everyday work</span><span>Getting ready</span><span>Ready to divide</span></div></div><div><button class="btn ghost" id="play" type="button">Play the animation</button></div></div></div>`)}
+  ${ACT('Drag the slider','How does it fit? The cell packs its DNA in levels, each one tighter than the last. Drag the slider all the way to “Ready to divide” and watch each level form.',`<div class="morph"><div class="mfig"><canvas id="mc" role="img" aria-label="Animation of DNA packing from a double helix into a chromosome"></canvas><ol class="msteps" aria-hidden="true">${PACK_STAGES.map(p=>`<li>${p.name}</li>`).join('')}</ol><p class="mcap" id="mcap" aria-live="polite"></p></div><div class="stack"><div class="stage" id="stage"></div><p id="stageText"></p><div><label for="cond" class="lab">Get the cell ready to divide</label><input type="range" id="cond" min="0" max="100" value="0"><div class="range-ends"><span>Everyday work</span><span>Ready to divide</span></div></div><div><button class="btn ghost" id="play" type="button">Play the animation</button></div></div></div>`)}
   ${ACT('Quick check','',`<div id="p0c1"></div>`)}`,{note:'pack'})
   +SEC('46 pieces',`<p>Your DNA is split into separate pieces, and each piece packed tight is one chromosome. You got <b>23 from your mom’s egg</b> and <b>23 from your dad’s sperm</b>.</p>
   ${ACT('Watch','Play the fertilization all the way through and see what every body cell ends up with.',`<div id="fz"></div>`)}
   ${ACT('Quick check','',`<div id="p0c2"></div>`)}`,{note:'count'})
   +SEC('Every species has its own number',`${ACT('Connect','Match each organism to how many chromosomes are in one of its body cells. You already know one. Guess the rest; misses just teach you.',`<div id="spm"></div>`)}`,{note:'species'}),
   bind:root=>{
-   const cv=$('#mc',root),rg=$('#cond',root),st=$('#stage',root),tx=$('#stageText',root);const M=makeMorph(7);let t=0,target=null,raf;const fm=task(cv);
-   const setStage=()=>{if(t<.34){st.innerHTML='<small>Everyday working cell</small>Chromatin';tx.textContent='The DNA is loose and spread all through the nucleus. That loose form is chromatin. Loose DNA is easy for the cell to read, so this is when genes are used to make proteins. Cells spend most of their lives like this.'}
-     else if(t<.82){st.innerHTML='<small>Getting ready to divide</small>Condensing';tx.textContent='The cell has copied its DNA and is getting ready to split into two cells. The chromatin coils tighter and tighter, and the edge of the nucleus fades away so the DNA can be moved.'}
-     else{if(t>.97)fm();st.innerHTML='<small>Ready to divide</small>Chromosome';tx.textContent='Fully packed. Each chromosome is now two identical copies, called sister chromatids, joined at a centromere. It is compact enough to move without tangling, and thick enough to see under a light microscope.'}};
-   const loop=time=>{const dt=Math.min(.05,(time-(loop.l||time))/1000);loop.l=time;if(target!==null){t=Math.min(1,t+dt*.34);if(t>=target){t=target;target=null}rg.value=Math.round(t*100);setStage()}if(cv.offsetParent)drawMorph(cv,M,t,time);raf=requestAnimationFrame(loop)};
-   setStage();raf=requestAnimationFrame(loop);onCleanup(()=>cancelAnimationFrame(raf));
-   rg.oninput=()=>{target=null;t=rg.value/100;setStage()};
-   $('#play',root).onclick=()=>{t=0;target=1;setStage()};
+   const cv=$('#mc',root),rg=$('#cond',root),st=$('#stage',root),tx=$('#stageText',root),cap=$('#mcap',root),steps=$$('.msteps li',root);let t=0,target=null,raf,timer,si=-1,drawn='';const fm=task(cv);
+   const setStage=()=>{if(t<.66){st.innerHTML='<small>Everyday working cell</small>Chromatin';tx.textContent='The DNA is loose and spread all through the nucleus. That loose form, DNA wrapped around histone proteins, is chromatin. Loose DNA is easy for the cell to read, so this is when genes are used to make proteins. Cells spend most of their lives like this.'}
+     else if(t<.86){st.innerHTML='<small>Getting ready to divide</small>Condensing';tx.textContent='The cell has copied its DNA and is getting ready to split into two cells. The chromatin fiber loops and coils tighter and tighter, and the edge of the nucleus fades away so the DNA can be moved.'}
+     else{if(t>.97)fm();st.innerHTML='<small>Ready to divide</small>Chromosome';tx.textContent='Fully packed. Each chromosome is now two identical copies, called sister chromatids, joined at a centromere. It is compact enough to move without tangling, and thick enough to see under a light microscope.'}
+     const i=packStage(t);if(i!==si){si=i;const p=PACK_STAGES[i];cap.innerHTML=`<b>${p.name}</b> ${p.say}`;cv.setAttribute('aria-label','Animation of DNA packing. Now showing: '+p.name);steps.forEach((li,j)=>{li.classList.toggle('on',j===i);li.classList.toggle('done',j<i)})}};
+   setStage();
+   if(reduced){
+     // still frames only: redraw when the slider moves; Play steps through one frame per level
+     const paint=()=>{if(cv.offsetParent)drawPack(cv,t,0)};requestAnimationFrame(paint);addEventListener('resize',paint);onCleanup(()=>{removeEventListener('resize',paint);clearTimeout(timer)});
+     rg.oninput=()=>{clearTimeout(timer);t=rg.value/100;setStage();paint()};
+     $('#play',root).onclick=()=>{clearTimeout(timer);const fr=[.03,.32,.5,.76,1];let i=0;const next=()=>{t=fr[i];rg.value=Math.round(t*100);setStage();paint();if(++i<fr.length)timer=setTimeout(next,1600)};next()};
+   }else{
+     // redraw only when something changed, plus while the helix is close enough to see it turn
+     const loop=time=>{const dt=Math.min(.05,(time-(loop.l||time))/1000);loop.l=time;if(target!==null){t=Math.min(1,t+dt/7.5);if(t>=target){t=target;target=null}rg.value=Math.round(t*100);setStage()}
+       const key=t+'|'+cv.clientWidth+'|'+getComputedStyle(document.documentElement).getPropertyValue('--dna');if(cv.offsetParent&&(key!==drawn||t<.45)){drawn=key;drawPack(cv,t,time)}raf=requestAnimationFrame(loop)};
+     raf=requestAnimationFrame(loop);onCleanup(()=>cancelAnimationFrame(raf));
+     rg.oninput=()=>{target=null;t=rg.value/100;setStage()};
+     $('#play',root).onclick=()=>{t=0;target=1;setStage()};
+   }
    cfu($('#p0c1',root),{q:'A skin cell is busy making proteins right now. What form is most of its DNA in?',options:[{text:'Chromatin: loose, so its genes can be read'},{text:'Chromosomes: tightly packed into X shapes'},{text:'Neither: the DNA leaves the nucleus'}],ans:0,why:'A working cell keeps its DNA loose as chromatin so it can read its genes. It only packs DNA into chromosomes when it gets ready to divide.'});
    mountFertilize($('#fz',root));
    cfu($('#p0c2',root),{q:'How many chromosomes are in one of your skin cells?',options:[{text:'46, in 23 pairs'},{text:'23, one from each parent'},{text:'92, two sets of 46'}],ans:0,why:'23 from the egg plus 23 from the sperm makes 46: 23 matching pairs. Every body cell has the same 46.'});
