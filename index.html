@@ -9,7 +9,7 @@
 <title>Mustang Karyotype Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@500;600&family=Mrs+Saint+Delafield&display=swap">
 <style>
 /* Layout: one 1040px lab-bench column; a sticky top bar carries the credential track; specimens always sit on a gridded light box that stays bright in both themes, like a real viewing table */
 /* row colors for the table rebuild */
@@ -357,6 +357,48 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .ring.ne{border-color:var(--gold);background:var(--gold-soft);color:var(--gold)}
 .ring.ne b{font-size:2.4rem}
 .ring b.ip{font-size:2.3rem}
+.badge{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"ring info photo" "sig sig sig"}
+.badge>.ring{grid-area:ring}.badge>.stack{grid-area:info}.badge>.idphoto{grid-area:photo}.badge>.sig{grid-area:sig}
+@media (max-width:820px){.badge{grid-template-columns:auto auto;justify-content:start;grid-template-areas:"ring photo" "info info" "sig sig"}}
+@media (max-width:420px){.badge .ring{width:122px;height:122px}.badge .ring b{font-size:2.8rem}}
+.idphoto{margin:0;width:148px;box-sizing:border-box;display:grid;gap:6px;justify-items:center;align-self:start}
+.idphoto:not(.empty){padding:0 8px 8px;border:2px solid var(--line);border-radius:14px;background:var(--surface-2);overflow:hidden}
+.id-tag{justify-self:stretch;margin:0 -8px;padding:5px 0;text-align:center;background:var(--accent);color:#fff;font:700 .62rem/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase}
+.idphoto img{box-sizing:border-box;width:124px;height:124px;border-radius:10px;object-fit:cover;display:block;border:2px solid var(--surface)}
+.idphoto figcaption{font-size:.74rem;color:var(--muted);display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+.linkbtn{background:none;border:0;padding:0;font:600 .74rem/1.2 var(--font-body);color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.id-add{width:148px;height:170px;display:grid;place-content:center;justify-items:center;gap:6px;padding:10px;border:2px dashed color-mix(in srgb,var(--accent) 55%,var(--line));border-radius:14px;background:var(--accent-soft);color:var(--accent-ink);cursor:pointer;text-align:center;font:inherit;transition:transform .2s ease,border-color .2s ease}
+.id-add:hover{transform:translateY(-2px);border-color:var(--accent)}.id-add .ic{width:30px;height:30px}.id-add b{font:700 .9rem/1.15 var(--font-display)}.id-add span{font-size:.72rem;color:var(--muted)}
+.sig{display:grid;gap:4px;padding-top:12px;border-top:1px dashed var(--line)}
+.sig-ink{position:relative;height:66px;width:min(340px,100%)}
+.sig-name{position:absolute;left:2px;top:-4px;font:400 3.1rem/1.3 'Mrs Saint Delafield',cursive;color:var(--accent-ink);white-space:nowrap;animation:sigwrite 1.8s cubic-bezier(.5,.1,.4,1) .3s both}
+.sig-swash{position:absolute;left:0;bottom:2px;width:min(300px,88%);height:20px;overflow:visible}
+.sig-swash path{fill:none;stroke:var(--accent);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:300;stroke-dashoffset:300;animation:sigswash .7s ease-out 1.9s forwards}
+.rm .sig-swash path{stroke-dashoffset:0}
+.sig-hoof{position:absolute;right:0;top:6px;width:46px;height:46px;color:var(--gold);opacity:.9;transform:rotate(-14deg);animation:hoof .5s cubic-bezier(.2,1.4,.4,1) 2.4s both}
+.sig-hoof svg{width:100%;height:100%}
+.sig.wait .sig-ink{height:34px;border-bottom:2px dotted var(--line)}
+.sig-who{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted)}.sig-who b{color:var(--ink)}.sig-who .marty{flex:none}
+@keyframes sigwrite{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes sigswash{to{stroke-dashoffset:0}}
+@keyframes hoof{from{opacity:0;transform:scale(1.9) rotate(-30deg)}to{opacity:.9;transform:rotate(-14deg)}}
+.booth{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:16px;background:rgba(8,16,26,.72);overflow:auto}
+.booth-box{width:min(440px,100%);background:var(--surface);color:var(--ink);border-radius:18px;padding:16px;display:grid;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.booth-head{display:flex;justify-content:space-between;align-items:start;gap:10px}.booth-head h2{font:800 1.4rem/1.1 var(--font-display)}
+.booth-x{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none}.booth-x .ic{width:18px;height:18px}
+.booth-view{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:#16202B}
+.booth-view video,.booth-view img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.booth-view video{transform:scaleX(-1)}
+.booth-frame{position:absolute;inset:10px;border:3px solid rgba(255,255,255,.75);border-radius:12px;pointer-events:none}
+.booth-frame span{position:absolute;left:50%;top:-1px;transform:translateX(-50%);padding:4px 10px;border-radius:0 0 8px 8px;background:rgba(255,255,255,.85);color:#1A2C3C;font:700 .6rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.booth-count{position:absolute;inset:0;display:grid;place-items:center;font:800 6rem/1 var(--font-display);color:#fff;text-shadow:0 4px 18px rgba(0,0,0,.5);pointer-events:none}
+.booth-count.pop{animation:bpop .8s ease-out both}
+@keyframes bpop{from{opacity:0;transform:scale(1.6)}30%{opacity:1;transform:scale(1)}to{opacity:.2;transform:scale(.9)}}
+.booth-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}.booth-flash.go{animation:bflash .5s ease-out}
+@keyframes bflash{from{opacity:.95}to{opacity:0}}
+.booth-msg{position:absolute;left:14px;right:14px;bottom:14px;margin:0;padding:10px 12px;border-radius:10px;background:rgba(10,20,30,.78);color:#fff;font-size:.88rem;text-align:center}
+.booth-btns{display:flex;flex-wrap:wrap;gap:10px}.booth-btns .btn{display:inline-flex;align-items:center;gap:8px}.booth-btns .ic{width:18px;height:18px}
+.booth-file{position:relative;cursor:pointer}.booth-file input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}.booth-file:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.booth-note{margin:0}
 .badge-name{font:800 clamp(1.6rem,4.5vw,2.3rem)/1.1 var(--font-display)}
 .meta{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted)}
 .ok-t{color:var(--good);font-weight:700}
@@ -507,6 +549,7 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .zc{width:104px;height:104px;border-radius:50%;background:var(--surface);border:2px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;overflow:hidden;transition:transform .6s ease,box-shadow .6s ease,border-color .6s ease}
 .zp:hover .zc{transform:translateY(-3px);border-color:color-mix(in srgb,var(--accent) 55%,var(--line));box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 16%,transparent),0 10px 24px color-mix(in srgb,var(--accent) 22%,transparent)}
 .zc svg{width:88%;height:88%}
+.zc .packcv{width:90%;height:90%;display:block;transform-origin:center}.zc .packcv.big{width:116%;height:116%;margin:-8%}
 .zp figcaption{display:grid;justify-items:center;text-align:center;gap:2px}
 .zp figcaption b{font:700 .95rem/1.1 var(--font-display)}
 .zp figcaption span{font:500 .72rem/1.2 var(--font-mono);color:var(--muted)}
@@ -855,7 +898,7 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .xv-hint{background:var(--gold-soft);border-left:4px solid var(--gold);padding:10px 12px;border-radius:0 10px 10px 0}
 .xv-rule{font-size:.8rem;color:var(--muted)}
 .hintline .ic{color:var(--gold);margin-right:4px}
-@media (prefers-reduced-motion:reduce){.xv-body,.xv-wave,.xv-eyes,.xv-shadow{animation:none}}
+.rm .xv-body,.rm .xv-wave,.rm .xv-eyes,.rm .xv-shadow{animation:none}
 .kphoto{margin:0;background:#f2f2ef;border:1px solid #c9c9c3;border-radius:6px;box-shadow:0 2px 0 #dcdcd6,0 12px 26px rgba(0,0,0,.12);overflow:hidden;--chr-body:#e8e8e4;--chr-edge:#3b3b3b;--stain:#1d1d1d;color:#222}
 .kphoto .kp-head,.kphoto figcaption{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 14px;font:600 .72rem/1.3 var(--font-mono);letter-spacing:.04em;text-transform:uppercase;color:#333;background:#e4e4df;border-bottom:1px solid #cfcfc8}
 .kphoto figcaption{border-bottom:0;border-top:1px solid #cfcfc8;text-transform:none;letter-spacing:0;font-size:.8rem}
@@ -947,7 +990,7 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .drawer-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
 footer.foot{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:0 30px;color:var(--muted);font-size:.82rem}
 
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.rm *{animation:none!important;transition:none!important}
 
 /* ===== v21: lesson stepper, activity boxes, notes, games ===== */
 .learn-head{align-items:flex-end;margin-bottom:12px}
@@ -1178,6 +1221,7 @@ body.docked .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)}
 .btn.danger{background:var(--bad);color:#fff}
 .toc-restart{color:var(--bad)!important;margin-top:10px}
 .toc-time{margin:10px 0 0 12px}
+.toc-motion{display:grid!important;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;margin-top:6px}.toc-motion .ic{width:18px;height:18px;grid-row:span 2}.toc-motion b{color:var(--ink)}.toc-motion .small{font-weight:500}
 @media (max-width:700px){.hub-btns{align-items:flex-start;flex-direction:row;flex-wrap:wrap}}
 .drag-ghost.loose{transform:translate(-50%,-50%)!important}
 .drag-ghost.ghost-faint{opacity:.25}
@@ -1259,7 +1303,7 @@ kbd{font:600 .78rem var(--font-mono);border:1px solid var(--line);border-bottom-
 @keyframes barshine{from{background-position:-60px 0}to{background-position:calc(100% + 60px) 0}}
 .stamp{animation:stamp .6s cubic-bezier(.2,1.4,.4,1) both .2s}
 @keyframes stamp{from{opacity:0;transform:scale(1.8) rotate(-8deg)}to{opacity:1;transform:rotate(-2deg)}}
-@media (prefers-reduced-motion:reduce){#amb{opacity:.6}.hero::before,.shimmer,.ep-field,.ep-sweep,.mini-field,.mf-spin,.strip-scan,.strip-item,.lvc-top svg,.lv-em svg,.meter .bar i,.stamp{animation:none!important}}
+.rm #amb{opacity:.6}.rm .hero::before,.rm .shimmer,.rm .ep-field,.rm .ep-sweep,.rm .mini-field,.rm .mf-spin,.rm .strip-scan,.rm .strip-item,.rm .lvc-top svg,.rm .lv-em svg,.rm .meter .bar i,.rm .stamp{animation:none!important}
 </style>
 </head>
 <body>
@@ -1280,9 +1324,16 @@ const pick=a=>a[Math.floor(R()*a.length)];
 const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(R()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+// motion: animations play as designed unless the student switches to still pictures in Contents (saved on this device).
+// Many school computers ask every website for reduced motion through a system setting (Windows "Animation effects"),
+// which used to freeze the lab's animations, so that setting alone no longer turns them off.
+const MOTION_KEY='mustang-karyo-motion',OS_REDUCE=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let reduced=(()=>{try{return localStorage.getItem(MOTION_KEY)==='reduce'}catch(e){return false}})();
+document.documentElement.classList.toggle('rm',reduced);
+function setMotion(r){reduced=r;try{localStorage.setItem(MOTION_KEY,r?'reduce':'full')}catch(e){}document.documentElement.classList.toggle('rm',r);
+  if(CINE)CINE.close(true);ambRestart();if(view.name!=='prove')render();toast(r?'Still pictures on. Animations are paused.':'Animations on.')}
 let CLEAN=[];const onCleanup=f=>CLEAN.push(f);
-function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),2600)}
+function toast(msg,ms=2600){const t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),ms)}
 const fmtTime=ms=>{const m=Math.round(ms/60000);if(m<1)return 'under 1 min';const h=Math.floor(m/60);return h?`${h} hr ${m%60} min`:m+' min'};
 
 /* ---------- chromosomes ---------- */
@@ -1390,7 +1441,9 @@ function drawMorph(cv,M,t,time,still){
     if(i){const L=layers[Math.min(3,Math.floor(b[2]*4))];L.moveTo(px,py);L.lineTo(X,Y)}px=X;py=Y}}
   layers.forEach((L,l)=>{ctx.globalAlpha=1-(3-l)*.2*e;ctx.stroke(L)});ctx.globalAlpha=1;
 }
-function paintMicros(root){requestAnimationFrame(()=>{$$('canvas.micro',root).forEach(cv=>drawMorph(cv,makeMorph(+cv.dataset.seed),+cv.dataset.t,0,true));$$('canvas.cellcv',root).forEach(cv=>drawCell(cv,+cv.dataset.st,+cv.dataset.seed))})}
+function paintMicros(root){requestAnimationFrame(()=>{$$('canvas.micro:not(.packcv)',root).forEach(cv=>drawMorph(cv,makeMorph(+cv.dataset.seed),+cv.dataset.t,0,true));$$('canvas.cellcv',root).forEach(cv=>drawCell(cv,+cv.dataset.st,+cv.dataset.seed));$$('canvas.packcv',root).forEach(cv=>drawPack(cv,+cv.dataset.tau,{labels:0}))})}
+// still pictures follow the window size and light/dark mode
+{let t;const again=()=>{clearTimeout(t);t=setTimeout(()=>paintMicros(document),150)};addEventListener('resize',again);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',again)}
 /* ---------- DNA packing (Level 1, Lesson 1): five scenes on one clock ---------- */
 // Everything on the canvas is a function of tau, seconds along one timeline, so each scene starts exactly where the last one stopped.
 // The close-up scenes are built in nanometres (real DNA wrapped on histones) and laid along the same curve as the loose chromatin,
@@ -1586,9 +1639,15 @@ function drawPackLabels(ctx,tau,w,h,anc,col,mult){
     ctx.globalAlpha=al;ctx.fillStyle=ink;ctx.textAlign='left';ctx.fillText(l.t,x+pad,y+th/2+.5)});
   ctx.globalAlpha=1;
 }
-// opts.labels: how much of the labels to show (0–1), so a quick rewind can hide them
+// opts.labels: how much of the labels to show (0–1), so a quick rewind can hide them.
+// PACK_DPR: if frames run slow (an older laptop), drop to fewer pixels instead of stuttering
+let PACK_DPR=4,PACK_COST=0;
 function drawPack(cv,tau,opts={}){
-  const ctx=cv.getContext('2d');const dpr=window.devicePixelRatio||1;const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
+  const t0=performance.now();try{drawPack1(cv,tau,opts)}finally{const d=performance.now()-t0;PACK_COST=PACK_COST*.85+d*.15;
+    if(PACK_COST>16&&PACK_DPR>1){PACK_DPR=Math.max(1,Math.min(PACK_DPR,window.devicePixelRatio||1)-.5);PACK_COST=8}}
+}
+function drawPack1(cv,tau,opts){
+  const ctx=cv.getContext('2d');const dpr=Math.min(PACK_DPR,window.devicePixelRatio||1);const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
   if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
   const css=getComputedStyle(document.documentElement),col=n=>css.getPropertyValue(n).trim();
@@ -1630,9 +1689,9 @@ function packCinema(opener){
     segs.forEach((s,j)=>{$('b',s).style.width=(reduced?(i>=j&&T>=TITLE?100:0):Math.min(1,Math.max(0,(tau-PACK_B[j])/PACK_STAGES[j].dur))*100)+'%';s.classList.toggle('on',j===i)});
     if(i!==si){si=i;now.innerHTML=i<0?'':`<b>Step ${i+1} of ${N} · ${PACK_STAGES[i].name}</b> ${PACK_STAGES[i].text}`}
     drawPack(cv,tau,{labels:1-fade(TITLE+PLAY,TITLE+PLAY+.6,TOTAL+1,TOTAL+2)})};
-  const loop=t=>{const dt=Math.min(.1,last?(t-last)/1000:0);last=t;if(!paused)T+=dt;
+  const loop=t=>{raf=requestAnimationFrame(loop);const dt=Math.min(.25,last?(t-last)/1000:0);last=t;if(!paused)T+=dt;
     if(T>=TOTAL){close();return}
-    frame();raf=requestAnimationFrame(loop)};
+    frame()};
   const setPause=v=>{paused=v;pp.innerHTML=v?IC.play:IC.pause;pp.setAttribute('aria-label',v?'Play':'Pause')};
   pp.onclick=()=>setPause(!paused);
   x.onclick=()=>close();
@@ -1818,9 +1877,9 @@ function openContents(){
   <button class="toc-link" data-go="hub" type="button"${cur('hub')}>Shift board</button>
   ${P?`<button class="toc-link toc-resume" data-resume type="button"${cur('prove')}>${IC.play} Resume Level ${P.lv} Prove It · ${P.phase==='items'?`item ${Math.min(P.results.length+1,P.items.length)} of ${P.items.length}`:'last step'}</button>`:''}
   ${[1,2,3].map(l=>{const open=unlocked(l),L=S.lv[l];return `<section class="toc-lv${open?'':' locked'}"><h3>Level ${l} · ${LVINFO[l].badge}${complete(l)?' <span class="ok-t">✓ complete</span>':''}</h3>${open?`<ol>${LEARN[l].map((x,i)=>{const ok=L.learned||i<=reach(l);return `<li><button class="toc-link" data-lv="${l}" data-step="${i}" type="button"${cur('learn',{lv:l,step:i})}${ok?'':' disabled'}>${ok?'':IC.lock+' '}${x.title}${!L.learned&&lvDone(l).includes(i)?' <span class="ok-t">✓</span>':''}</button></li>`}).join('')}</ol><button class="toc-link toc-prove" data-prove="${l}" type="button" ${L.learned||(P&&P.lv===l)?'':'disabled'}>${P&&P.lv===l?IC.play+' Resume Prove It':L.learned?(complete(l)?'Retake Prove It':'Prove It'):IC.lock+' Prove It · finish the lesson first'}</button>`:`<p class="small muted">${IC.lock} Locked · finish the Level ${l-1} Prove It first</p>`}</section>`}).join('')}
-  <button class="toc-link" data-go="report" type="button"${cur('report')}>Credential report</button><p class="small muted toc-time">${IC.clock} Active lab time: ${fmtTime(actT('total'))}</p><button class="toc-link toc-restart" data-restart type="button">Start over from the beginning</button></nav>`;
+  <button class="toc-link" data-go="report" type="button"${cur('report')}>Credential report</button><p class="small muted toc-time">${IC.clock} Active lab time: ${fmtTime(actT('total'))}</p><button class="toc-link toc-motion" data-motion type="button" role="switch" aria-checked="${!reduced}">${reduced?IC.pause:IC.play}<span>Animations: <b>${reduced?'off (still pictures)':'on'}</b></span><span class="small muted">${reduced?'Tap to turn them back on':'Tap for still pictures if motion bothers you'}</span></button><button class="toc-link toc-restart" data-restart type="button">Start over from the beginning</button></nav>`;
   openDrawer('Contents',body,(m,close)=>{
-    $$('[data-go]',m).forEach(b=>b.onclick=()=>{close();go(b.dataset.go)});$$('[data-restart]',m).forEach(b=>b.onclick=()=>{close();confirmRestart()});
+    $$('[data-go]',m).forEach(b=>b.onclick=()=>{close();go(b.dataset.go)});$$('[data-restart]',m).forEach(b=>b.onclick=()=>{close();confirmRestart()});$$('[data-motion]',m).forEach(b=>b.onclick=()=>{close();setMotion(!reduced)});
     $$('[data-resume]',m).forEach(b=>b.onclick=()=>{close();go('prove')});
     $$('[data-lv]',m).forEach(b=>b.onclick=()=>{close();go('learn',{lv:+b.dataset.lv,step:+b.dataset.step})});
     $$('[data-prove]',m).forEach(b=>b.onclick=()=>{close();const l=+b.dataset.prove;if(P&&P.lv===l)go('prove');else startProve(l)});
@@ -1837,7 +1896,7 @@ function eggSpermNote(){
 const noteChr=(id,o={})=>chrSVG(id,{scale:.5,w:16,...o});
 const NOTES=[
  {k:'pack',lv:1,page:0,from:'Pack it up',t:'DNA has a packing problem',
-  art:()=>`<div class="nt-pair"><figure><canvas class="micro mini" data-t="0" data-seed="11" aria-hidden="true"></canvas><figcaption>Chromatin</figcaption></figure><span class="nt-arrow" aria-hidden="true">→</span><figure><canvas class="micro mini" data-t="1" data-seed="11" aria-hidden="true"></canvas><figcaption>Chromosome</figcaption></figure></div>`,
+  art:()=>`<div class="nt-pair"><figure><canvas class="micro mini packcv" data-tau="${PACK_B[3]}" aria-hidden="true"></canvas><figcaption>Chromatin</figcaption></figure><span class="nt-arrow" aria-hidden="true">→</span><figure><canvas class="micro mini packcv" data-tau="${PACK_END}" aria-hidden="true"></canvas><figcaption>Chromosome</figcaption></figure></div>`,
   pts:['About 2 meters of DNA fits in a nucleus 6 micrometers wide.','DNA wraps around <b>histone</b> proteins like thread on spools. Each spool is a <b>nucleosome</b>.','<b>Chromatin</b> = loose DNA wrapped on histones. The cell can read its genes.','<b>Chromosome</b> = chromatin coiled tight before a cell divides, so it can move without tangling.']},
  {k:'count',lv:1,page:0,from:'46 pieces',t:'46 chromosomes, 23 pairs',art:eggSpermNote,
   pts:['Egg brings 23 chromosomes, sperm brings 23.','Every human body cell has <b>46</b>, in <b>23 pairs</b>.','Egg and sperm cells have only 23.']},
@@ -2175,14 +2234,14 @@ function eyepiece(){
 
 /* body → DNA zoom strip */
 function zoomStrip(){
-  // a friendly teen in a Carolina blue Mustangs shirt; the right arm waves, and faint circles hint at the cells inside
+  // a friendly teen in a Carolina blue Mustangs shirt; the raised right arm (sleeve and all) waves, and faint circles hint at the cells inside
   const SKIN='#F2C9A8',INK='#1A2C3C';
   const person=`<svg viewBox="0 0 100 100"><defs><clipPath id="zc-you"><path d="M37 34Q50 30 63 34L64 60H36Z"/><path d="M37.5 58H62.5L61.5 86H52.5L50 66L47.5 86H38.5Z"/></clipPath></defs><g class="zbob">
     <path d="M37.5 58H62.5L61.5 86H52.5L50 66L47.5 86H38.5Z" fill="#3E6189"/>
     <ellipse cx="43" cy="88.5" rx="6" ry="3" fill="#F4F6F8" stroke="#8A99A8" stroke-width="1"/><ellipse cx="57" cy="88.5" rx="6" ry="3" fill="#F4F6F8" stroke="#8A99A8" stroke-width="1"/>
     <path d="M37.5 37L32 56" stroke="${SKIN}" stroke-width="6" stroke-linecap="round"/><circle cx="31.5" cy="57.5" r="3.4" fill="${SKIN}"/>
-    <g class="zwave"><path d="M62.5 37L72 24" stroke="${SKIN}" stroke-width="6" stroke-linecap="round"/><circle cx="73" cy="21.5" r="3.6" fill="${SKIN}"/></g>
-    <path d="M37 34Q50 30 63 34L64 60H36Z" fill="#4B9CD3"/><path d="M37 34L32 44L37.5 46.5L39 40Z" fill="#4B9CD3"/><path d="M63 34L69.5 42.5L64 46L61 40Z" fill="#4B9CD3"/>
+    <path d="M37 34Q50 30 63 34L64 60H36Z" fill="#4B9CD3"/><path d="M37 34L32 44L37.5 46.5L39 40Z" fill="#4B9CD3"/>
+    <g class="zwave"><path d="M62.5 37L72 24" stroke="${SKIN}" stroke-width="6" stroke-linecap="round"/><circle cx="73" cy="21.5" r="3.6" fill="${SKIN}"/><path d="M61.6 38.6L67.4 30.6" stroke="#4B9CD3" stroke-width="9" stroke-linecap="round"/></g>
     <g clip-path="url(#zc-you)" fill="#fff" opacity=".22">${[[41,39],[58,37],[45,54],[56,51],[41,64],[59,66],[43,77],[57,79]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.2"/>`).join('')}</g>
     <path d="M45.5 48V41.5L50 45.5L54.5 41.5V48" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
     <rect x="46.5" y="26" width="7" height="6" rx="2" fill="${SKIN}"/>
@@ -2193,8 +2252,9 @@ function zoomStrip(){
     <path d="M46.4 22.4Q50 26 53.6 22.4" fill="none" stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/></g></svg>`;
   const rng=mulberry32(9);let blob='';for(let i=0;i<=24;i++){const a=i/24*6.283,r=38+Math.sin(a*3)*3+rng()*2;blob+=(i?'L':'M')+(50+Math.cos(a)*r).toFixed(1)+','+(50+Math.sin(a)*r).toFixed(1)}
   const cell=`<svg viewBox="0 0 100 100"><path d="${blob}Z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/>${[[28,36],[70,62],[64,30],[34,68],[74,44]].map(([x,y],i)=>`<ellipse class="zfloat" style="--d:${(9+i*1.3).toFixed(1)}s;--dl:-${(i*2.1).toFixed(1)}s" cx="${x}" cy="${y}" rx="5" ry="2.6" fill="var(--accent)" opacity=".5"/>`).join('')}<circle cx="50" cy="50" r="16" fill="var(--nucleus)" stroke="var(--nucleus-edge)" stroke-width="2"/><circle cx="54" cy="46" r="4.5" fill="var(--dna)" opacity=".6"/></svg>`;
-  const nucleus=`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="var(--nucleus)" stroke="var(--nucleus-edge)" stroke-width="3"/><g class="zdrift">${tangle(50,50,40,260,17,1.1)}</g></svg>`;
-  const chrom=`<svg viewBox="0 0 100 100"><g class="zbreathe">${coilX(50,50,74,12,{turns:26,amp:4.6,sw:1.3,seed:21})}</g></svg>`;
+  // still frames from the packing animation below (end of step 3 and end of step 5), so the strip and the animation match
+  const nucleus=`<canvas class="packcv zdrift" data-tau="${PACK_B[3]}" aria-hidden="true"></canvas>`;
+  const chrom=`<canvas class="packcv zbreathe big" data-tau="${PACK_END}" aria-hidden="true"></canvas>`;
   let s1='',s2='',rungs='';for(let x=-50;x<=150;x+=2){const y1=50+17*Math.sin(x/50*6.283),y2=50-17*Math.sin(x/50*6.283);s1+=(x>-50?'L':'M')+x+','+y1.toFixed(1);s2+=(x>-50?'L':'M')+x+','+y2.toFixed(1)}
   for(let x=-50;x<=150;x+=6.25){const y1=50+17*Math.sin(x/50*6.283),y2=50-17*Math.sin(x/50*6.283);if(Math.abs(y1-y2)>5)rungs+=`<line x1="${x}" x2="${x}" y1="${y1.toFixed(1)}" y2="${(y1+y2)/2}" stroke="var(--accent)" stroke-width="2.6"/><line x1="${x}" x2="${x}" y1="${(y1+y2)/2}" y2="${y2.toFixed(1)}" stroke="var(--mark)" stroke-width="2.6"/>`}
   const dna=`<svg viewBox="0 0 100 100"><defs><clipPath id="zc-dna"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#zc-dna)"><g class="zhelix">${rungs}<path d="${s1}" fill="none" stroke="var(--dna)" stroke-width="3.2"/><path d="${s2}" fill="none" stroke="var(--accent-ink)" stroke-width="3.2"/></g></g></svg>`;
@@ -2500,11 +2560,11 @@ function buildRound(lv){
   if(lv===1){
     const cards=[...pickN(SORT.filter(s=>s[1]==='chromatin'),3),...pickN(SORT.filter(s=>s[1]==='chromosome'),3)].map(s=>[s[0],s[1]]);
     const ts=shuffle([1,0,R()<.5?1:0,R()<.5?1:0]);const pairs=pickN(BANK.parts,4);
-    return shuffle([{kind:'g',type:'bins',set:'form',cards:shuffle(cards)},{kind:'g',type:'cells',tiles:shuffle([0,0,1,1,2,2]).map(st=>({st,seed:seed()}))},...(()=>{const u=pick(BANK.uns1);const h=pick(VOCAB.filter(v=>v.lv===1&&v.w!==u[0]));return [{kind:'g',type:'unscramble',word:u[0],clue:u[1]},{kind:'g',type:'hangman',word:h.w,clue:h.clue}]})(),{kind:'g',type:'label'},{kind:'g',type:'locus',genes:shuffle([pick([0,1]),2,pick([3,4])]).slice(0,2)},{kind:'g',type:'order',set:'condense',seeds:[seed(),seed(),seed()],letters:shuffle(['P','Q','R'])},{kind:'g',type:'cloze',set:pick(['pack','parts'])},{kind:'g',type:'connections',groups:CONN[1]}]);
+    return shuffle([{kind:'g',type:'bins',set:'form',cards:shuffle(cards)},{kind:'g',type:'cells',tiles:shuffle([0,0,1,1,2,2]).map(st=>({st,seed:seed()}))},...(()=>{const u=pick(BANK.uns1);const h=freshWord(VOCAB.filter(v=>v.lv===1&&!v.xtra&&v.w!==u[0]));return [{kind:'g',type:'unscramble',word:u[0],clue:u[1]},{kind:'g',type:'hangman',word:h.w,clue:h.clue}]})(),{kind:'g',type:'label'},{kind:'g',type:'locus',genes:shuffle([pick([0,1]),2,pick([3,4])]).slice(0,2)},{kind:'g',type:'order',set:'condense',seeds:[seed(),seed(),seed()],letters:shuffle(['P','Q','R'])},{kind:'g',type:'cloze',set:pick(['pack','parts'])},{kind:'g',type:'connections',groups:CONN[1]}]);
   }
   const ranked=[...AUTOS].sort((a,b)=>CHR[b][0]-CHR[a][0]);const st=Math.floor(R()*16);const hom=pickN(ranked.slice(st,st+6),4);
   const cen=[...pickN(['1','3','16','19','20'],2),...pickN(['4','5','6','7','9','12','17','18'],2),...pickN(['13','14','15','21','22'],2)];
-  return shuffle([{kind:'g',type:'connect',set:'homolog',ids:hom,rOrder:shuffle([0,1,2,3])},{kind:'g',type:'bins',set:'centro',ids:shuffle(cen)},...(()=>{const w=pick(VOCAB.filter(v=>v.lv===2&&!v.long));return [{kind:'g',type:'wordle',word:w.w,clue:w.clue},{kind:'g',type:'connections',groups:CONN[2]}]})(),{kind:'g',type:'tapkg',t:Math.floor(R()*3),sex:R()<.5?'M':'F'},{kind:'g',type:'order',set:'steps'},...pickN(BANK.nums,2).map(([q,answer,unit])=>({kind:'g',type:'number',q,answer,unit,start:10+Math.floor(R()*15)})),{kind:'g',type:'bins',set:'can',cards:pickN(BANK.can.filter(c=>c[1]==='can'),2).concat(pickN(BANK.can.filter(c=>c[1]==='cant'),2))},{kind:'g',type:'cloze',set:pick(['aneu','kinds'])}]);
+  return shuffle([{kind:'g',type:'connect',set:'homolog',ids:hom,rOrder:shuffle([0,1,2,3])},{kind:'g',type:'bins',set:'centro',ids:shuffle(cen)},...(()=>{const w=freshWord(VOCAB.filter(v=>v.lv===2&&!v.long));return [{kind:'g',type:'wordle',word:w.w,clue:w.clue},{kind:'g',type:'connections',groups:CONN[2]}]})(),{kind:'g',type:'tapkg',t:Math.floor(R()*3),sex:R()<.5?'M':'F'},{kind:'g',type:'order',set:'steps'},...pickN(BANK.nums,2).map(([q,answer,unit])=>({kind:'g',type:'number',q,answer,unit,start:10+Math.floor(R()*15)})),{kind:'g',type:'bins',set:'can',cards:pickN(BANK.can.filter(c=>c[1]==='can'),2).concat(pickN(BANK.can.filter(c=>c[1]==='cant'),2))},{kind:'g',type:'cloze',set:pick(['aneu','kinds'])}]);
 }
 
 /* ---------- round 3: table art, part thumbnails, p/q labeling, gene addresses ---------- */
@@ -2918,13 +2978,12 @@ const LEARN={
    if(reduced){const mq=matchMedia('(prefers-color-scheme: dark)'),rp=()=>requestAnimationFrame(paint);rp();addEventListener('resize',rp);mq.addEventListener('change',rp);onCleanup(()=>{removeEventListener('resize',rp);mq.removeEventListener('change',rp)})}
    else{
      // real elapsed time, capped per frame so a hidden tab picks up where it left off
-     const loop=now=>{const dt=Math.min(.1,last?(now-last)/1000:0);last=now;
+     const loop=now=>{raf=requestAnimationFrame(loop);const dt=Math.min(.25,last?(now-last)/1000:0);last=now;
        if(run){if(run.mode==='seek'){run.p=Math.min(1,run.p+dt/run.dur);tau=run.from+(run.to-run.from)*sstep5(0,1,run.p);labs=1-sstep(0,.2,run.p)*(1-sstep(.8,1,run.p));if(run.p>=1){tau=run.to;labs=1;run.mode='play'}}
          else{tau=Math.min(PACK_B[run.i+1],tau+dt);if(tau>=PACK_B[run.i+1]){const i=run.i;run=null;done(i)}}
          fills()}
        const key=tau+'|'+labs+'|'+cv.clientWidth+'|'+getComputedStyle(document.documentElement).getPropertyValue('--dna');
-       if(cv.offsetParent&&!CINE&&key!==drawn){drawn=key;drawPack(cv,tau,{labels:labs})}
-       raf=requestAnimationFrame(loop)};
+       if(cv.offsetParent&&!CINE&&key!==drawn){drawn=key;drawPack(cv,tau,{labels:labs})}};
      raf=requestAnimationFrame(loop)}
    cfu($('#p0c1',root),{q:'A skin cell is busy making proteins right now. What form is most of its DNA in?',options:[{text:'Chromatin: loose, so its genes can be read'},{text:'Chromosomes: tightly packed into X shapes'},{text:'Neither: the DNA leaves the nucleus'}],ans:0,why:'A working cell keeps its DNA loose as chromatin so it can read its genes. It only packs DNA into chromosomes when it gets ready to divide.'});
    mountFertilize($('#fz',root));
@@ -2978,7 +3037,7 @@ const LEARN={
     {icon:IC.dropper,title:'Stain them',text:'The stain makes light and dark bands on each chromosome.',hint:'Add the bands first. A photo without them is hard to read.'},
     {icon:IC.camera,title:'Photograph and arrange',text:'Line up the chromosomes in homologous pairs, largest to smallest.',hint:'This is the last step.'}],
     onDone:el=>{el.innerHTML='<div class="fbbox ok"><strong>That’s the process.</strong> Watch the last step finish: the photo becomes a finished karyotype.</div>'}});
-   lessonWord($('#wd',root),'wordle',{first:'KARYOTYPE',lv:2});
+   lessonWord($('#wd',root),'wordle',{pool:VOCAB.filter(v=>['KARYOTYPE','STAIN'].includes(v.w)||v.lv===1)});
    cfu($('#k0c',root),{q:'Why does a lab pause cells mid-division before making a karyotype?',options:[{text:'That’s when the DNA is condensed into visible chromosomes'},{text:'That’s when the cell is reading its genes'},{text:'So the cells stop using energy'}],ans:0,why:'Only condensed chromosomes are thick enough to stain, see, and photograph.'})}},
  {title:'Three clues',html:()=>SEC('Three clues',`<p>Every chromosome has a matching partner, its <b>homolog</b>: one from mom, one from dad. Homologs look alike.</p>
   ${ACT('Explore','Tap all three clue tabs to see how to spot homologs.',`<div class="tabs" role="tablist"><button role="tab" aria-selected="true" data-t="size">1 · Size</button><button role="tab" aria-selected="false" data-t="band">2 · Banding pattern</button><button role="tab" aria-selected="false" data-t="cen">3 · Centromere position</button></div><div class="lightbox clue-box" id="clue"></div><p id="clueText"></p>`)}
@@ -3183,13 +3242,59 @@ function reportText(){
   const l3=bestAtt(3);if(l3&&l3.caseLog){lines.push('','Case log (best Level 3 round):');l3.caseLog.forEach(c=>lines.push(`  ${c.id} ${c.notation} → answered ${c.chosen} (${c.solved?'solved':'not solved'}${c.pts!=null?`, ${c.pts}/${c.max} points`:''}, ${c.mistakes} mismatched placement${c.mistakes===1?'':'s'})`));lines.push(`  Lab order ${l3.createCond}: ${l3.createTries} submission${l3.createTries===1?'':'s'}${l3.createPts!=null?`, ${l3.createPts}/4 points`:''}`)}
   return lines.join('\n');
 }
+/* lab ID photo: a webcam snapshot (or a photo file) for the credential report. It stays in this browser with the
+   student's saved progress and is never uploaded anywhere. */
+function photoBooth(opener){
+  const ov=document.createElement('div');ov.className='booth';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-label','Take your lab ID photo');
+  ov.innerHTML=`<div class="booth-box"><div class="booth-head"><div><p class="kicker">Credential report</p><h2>Lab ID photo</h2></div><button class="booth-x" type="button" aria-label="Close">${IC.close}</button></div>
+    <div class="booth-view"><video playsinline muted></video><img alt="Your new lab ID photo" hidden><div class="booth-frame" aria-hidden="true"><span>Mustang Karyotype Lab · ID</span></div><b class="booth-count" aria-live="assertive"></b><i class="booth-flash"></i><p class="booth-msg" aria-live="polite">Starting the camera…</p></div>
+    <p class="small muted booth-note">Your photo stays on this computer with your progress. It is never uploaded.</p>
+    <div class="booth-btns"><button class="btn" type="button" data-snap disabled>${IC.camera}<span>Snap photo</span></button><button class="btn" type="button" data-use hidden>${IC.check}<span>Use this photo</span></button><button class="btn ghost" type="button" data-again hidden>${IC.replay}<span>Retake</span></button><label class="btn ghost booth-file">Choose a photo file<input type="file" accept="image/*"></label></div></div>`;
+  document.body.appendChild(ov);document.body.classList.add('cine-open');
+  const vid=$('video',ov),img=$('img',ov),msg=$('.booth-msg',ov),cnt=$('.booth-count',ov),flash=$('.booth-flash',ov),snap=$('[data-snap]',ov),use=$('[data-use]',ov),again=$('[data-again]',ov),file=$('input',ov),x=$('.booth-x',ov);
+  let stream=null,shot=null,closed=false,timers=[];
+  const say=t=>{msg.textContent=t;msg.hidden=!t};
+  // a centered square, mirrored like the preview so the photo looks the way the student saw it
+  const square=(src,w,h,mirror)=>{const c=document.createElement('canvas'),n=320,q=Math.min(w,h);c.width=c.height=n;const g=c.getContext('2d');
+    if(mirror){g.translate(n,0);g.scale(-1,1)}g.drawImage(src,(w-q)/2,(h-q)/2,q,q,0,0,n,n);return c.toDataURL('image/jpeg',.85)};
+  const review=d=>{shot=d;img.src=d;img.hidden=false;vid.hidden=true;say('');snap.hidden=true;use.hidden=false;again.hidden=false;use.focus()};
+  const live=()=>{shot=null;img.hidden=true;vid.hidden=!stream;snap.hidden=false;use.hidden=true;again.hidden=true;snap.disabled=!stream;if(stream){say('');snap.focus()}else say('No camera here. Choose a photo file instead.')};
+  const start=async()=>{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){say('This browser can’t open a camera here. Choose a photo file instead.');return}
+    try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:720},height:{ideal:720}},audio:false});
+      if(closed){stream.getTracks().forEach(t=>t.stop());return}
+      vid.srcObject=stream;await vid.play().catch(()=>{});snap.disabled=false;say('');snap.focus()}
+    catch(e){const n=e&&e.name;say(n==='NotAllowedError'||n==='SecurityError'?'The camera is blocked. Allow it from the camera icon in the address bar, then reopen this, or choose a photo file instead.':
+      n==='NotReadableError'?'Another app (like Meet) is using the camera. Close it and try again, or choose a photo file instead.':'No camera found. You can choose a photo file instead.')}};
+  snap.onclick=()=>{if(!stream||snap.disabled)return;snap.disabled=true;let k=reduced?0:3;
+    const tick=()=>{if(closed)return;if(k>0){cnt.textContent=k;cnt.classList.remove('pop');void cnt.offsetWidth;cnt.classList.add('pop');k--;timers.push(setTimeout(tick,800));return}
+      cnt.textContent='';if(!reduced){flash.classList.remove('go');void flash.offsetWidth;flash.classList.add('go')}
+      snap.disabled=false;review(square(vid,vid.videoWidth,vid.videoHeight,true))};tick()};
+  again.onclick=live;
+  file.onchange=()=>{const f=file.files&&file.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);
+    im.onload=()=>{review(square(im,im.naturalWidth,im.naturalHeight,false));URL.revokeObjectURL(u)};im.onerror=()=>{say('That file isn’t a photo this browser can open. Try a JPG or PNG.');URL.revokeObjectURL(u)};im.src=u;file.value=''};
+  use.onclick=()=>{if(!shot)return;S.photo=shot;save();close();render();toast('Photo added to your credential report.')};
+  const key=e=>{if(e.key==='Escape'){e.preventDefault();close()}
+    else if(e.key==='Tab'){const f=$$('button:not([hidden]):not(:disabled),input',ov).filter(b=>!b.closest('[hidden]'));const k=f.indexOf(document.activeElement);e.preventDefault();f[(k+(e.shiftKey?f.length-1:1)+f.length)%f.length].focus()}};
+  document.addEventListener('keydown',key);x.onclick=()=>close();ov.addEventListener('click',e=>{if(e.target===ov)close()});
+  function close(){if(closed)return;closed=true;timers.forEach(clearTimeout);if(stream)stream.getTracks().forEach(t=>t.stop());document.removeEventListener('keydown',key);ov.remove();document.body.classList.remove('cine-open');if(opener&&opener.isConnected)opener.focus({preventScroll:true})}
+  onCleanup(close);x.focus({preventScroll:true});start();
+}
+// Marty signs the report once all three levels are finished; the horseshoe is his stamp
+const HOOF=`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M11 33V20a9 9 0 0 1 18 0v13" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>${[[11,29],[11,23],[29,29],[29,23],[13.5,15.5],[26.5,15.5]].map(([a,b])=>`<circle cx="${a}" cy="${b}" r="1.1" fill="var(--surface)"/>`).join('')}</svg>`;
+function martySig(done){
+  return done?`<div class="sig"><span class="kicker">Certified by</span><div class="sig-ink"><span class="sig-name">Marty the Mustang</span><svg class="sig-swash" viewBox="0 0 260 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16C60 6 120 22 176 12S242 4 256 9"/></svg><span class="sig-hoof">${HOOF}</span></div><div class="sig-who">${martySVG(26,{head:true})}<span><b>Marty the Mustang</b> · Lab Director, Mustang Karyotype Lab</span></div></div>`
+    :`<div class="sig wait"><span class="kicker">Certified by</span><div class="sig-ink"></div><div class="sig-who">${martySVG(26,{head:true})}<span>Marty signs this report once all three levels are finished.</span></div></div>`;
+}
 SCREENS.report=app=>{
   if(!S)return go('intro');
   const F=final(),e=F.level;
   const l3=bestAtt(3),est=[1,2,3].some(l=>(bestAtt(l)||{}).est);
   const struggles=[...new Set([1,2,3].flatMap(l=>{const a=latest(l);return a?a.missed.map(m=>`L${l} · ${m}`):[]}))].slice(0,10);
-  app.innerHTML=`<section class="report"><div class="card badge"><div class="ring ${F.done&&!e?'ne':''}"><div>${F.done?`<b>${e||'NE'}</b><span>${e?'Proficiency level':'Not enough evidence'}</span>`:`<b class="ip">${F.pct==null?'—':F.pct+'%'}</b><span>In progress</span>`}</div></div><div class="stack" style="gap:8px"><p class="kicker">Credential report · Standard 2.1 · HS-LS3-1</p><div class="badge-name">${esc(S.name)}</div>
-  <p>${F.done?(e?`${LVINFO[e].badge}: ${LVINFO[e].ican}`:`${NE_TXT} Retake any level with new specimens to raise the score.`):`Final proficiency shows once all three levels are finished. ${F.n} of 3 done so far.`}</p><div class="em-row">${[1,2,3].map(l=>`<span class="em-item">${emblem(l,{size:46,state:complete(l)?'earned':'locked'})}<span class="mono">${LVINFO[l].badge}</span></span>`).join('')}</div><div class="meta mono"><span>${new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})} · ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span><span>Overall: ${F.pct==null?'—':`${F.pts} / ${F.tot} points (${F.pct}%)`}</span><span>Active lab time: ${fmtTime(actT('total'))}</span></div></div></div>
+  const photo=S.photo?`<figure class="idphoto"><span class="id-tag">Lab ID</span><img src="${esc(S.photo)}" alt="Photo of ${esc(S.name)}"><figcaption><button type="button" class="linkbtn" id="photoBtn">Retake</button><span aria-hidden="true">·</span><button type="button" class="linkbtn" id="photoDel">Remove</button></figcaption></figure>`
+    :`<figure class="idphoto empty"><button type="button" class="id-add" id="photoBtn">${IC.camera}<b>Add your lab ID photo</b><span>Snap one with your camera</span></button></figure>`;
+  app.innerHTML=`<section class="report"><div class="card badge">${photo}<div class="ring ${F.done&&!e?'ne':''}"><div>${F.done?`<b>${e||'NE'}</b><span>${e?'Proficiency level':'Not enough evidence'}</span>`:`<b class="ip">${F.pct==null?'—':F.pct+'%'}</b><span>In progress</span>`}</div></div><div class="stack" style="gap:8px"><p class="kicker">Credential report · Standard 2.1 · HS-LS3-1</p><div class="badge-name">${esc(S.name)}</div>
+  <p>${F.done?(e?`${LVINFO[e].badge}: ${LVINFO[e].ican}`:`${NE_TXT} Retake any level with new specimens to raise the score.`):`Final proficiency shows once all three levels are finished. ${F.n} of 3 done so far.`}</p><div class="em-row">${[1,2,3].map(l=>`<span class="em-item">${emblem(l,{size:46,state:complete(l)?'earned':'locked'})}<span class="mono">${LVINFO[l].badge}</span></span>`).join('')}</div><div class="meta mono"><span>${new Date().toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'})} · ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</span><span>Overall: ${F.pct==null?'—':`${F.pts} / ${F.tot} points (${F.pct}%)`}</span><span>Active lab time: ${fmtTime(actT('total'))}</span></div></div>${martySig(F.done)}</div>
   <div class="tbl-wrap"><table><tr><th>Level</th><th>Status</th><th>Best points</th><th>Rounds finished / started</th><th>Hints (counting round)</th><th>Notes or lesson peeks during Prove It</th><th>Active time (lesson / Prove It)</th></tr>${[1,2,3].map(l=>{const L=S.lv[l],b=bestAtt(l);return `<tr><td><b>${l} · ${LVINFO[l].badge}</b></td><td>${b?'<span class="ok-t">Complete</span>':L.started?'<span class="muted">In progress</span>':'<span class="muted">Not started</span>'}</td><td class="mono">${b?`${b.score}/${b.total} (${pctOf(b)}%)${b.est?' est.':''}`:'—'}</td><td class="mono">${L.attempts.length} / ${L.started}</td><td class="mono">${b?lvHints(l):'—'}</td><td class="mono">${S.manual[l]}</td><td class="mono">${actFmt(actT('l'+l+'learn'))} / ${actFmt(actT('l'+l+'prove'))}</td></tr>`}).join('')}
   <tr><td><b>Overall</b></td><td>${F.done?`<b>${lvName(e)}</b>`:'<span class="muted">In progress</span>'}</td><td class="mono"><b>${F.pct==null?'—':`${F.pts}/${F.tot} (${F.pct}%)`}</b></td><td colspan="4" class="small muted">${CUT_TXT}. Then the hint cap applies.</td></tr></table></div>
   ${est?`<p class="small muted">est. = a Level 3 round from before points scoring, estimated as 6 points per solved case plus 4 for a lab order built in 2 tries or fewer.</p>`:''}
@@ -3205,6 +3310,8 @@ SCREENS.report=app=>{
    <p class="small muted">If you retake a level later and do better, take a new screenshot and add it to the same assignment.</p></div>
   <textarea id="rtxt" class="sr" aria-hidden="true" tabindex="-1"></textarea></section>`;
   $('#hub').onclick=()=>go('hub');
+  $('#photoBtn').onclick=e=>photoBooth(e.currentTarget);
+  {const d=$('#photoDel');if(d)d.onclick=()=>{delete S.photo;save();render();toast('Photo removed.')}}
   $('#copy').onclick=()=>{const txt=reportText();const done=()=>toast('Report copied. Paste it into your assignment.');
     const fallback=()=>{const ta=$('#rtxt');ta.value=txt;ta.classList.remove('sr');ta.style.cssText='width:100%;min-height:200px;font:0.9rem var(--font-mono)';ta.removeAttribute('aria-hidden');ta.select();toast('Press Ctrl+C (or ⌘+C) to copy the selected text.')};
     try{navigator.clipboard.writeText(txt).then(done,fallback)}catch(e){fallback()}};
@@ -3219,14 +3326,34 @@ const VOCAB=[
  {lv:1,w:'CHROMATID',clue:'One of the two identical copies that make up a copied chromosome'},
  {lv:1,w:'LOCUS',clue:'The exact spot where a gene sits on a chromosome'},
  {lv:1,w:'NUCLEUS',clue:'The part of a cell that holds its DNA'},
+ {lv:1,w:'HISTONE',clue:'A spool-shaped protein that DNA wraps around'},
+ {lv:1,w:'NUCLEOSOME',clue:'One histone spool with DNA wrapped around it, like a bead on a string'},
+ {lv:1,w:'GENE',clue:'A stretch of DNA at one locus that builds one product'},
+ {lv:1,w:'CONDENSING',clue:'What DNA is doing when the nucleus edge breaks up and the threads thicken'},
+ {lv:1,w:'HELIX',clue:'The twisted-ladder shape of DNA: a double ____',xtra:true},
+ {lv:1,w:'FIBER',clue:'Nucleosomes coiled into a thicker thread: the chromatin ____',xtra:true},
+ {lv:1,w:'SUPERCOIL',clue:'To coil an already coiled fiber again, packing chromatin even tighter',xtra:true},
+ {lv:1,w:'MICROGRAPH',clue:'A photo of cells taken through a microscope',xtra:true},
+ {lv:1,w:'BAND',clue:'A stripe on a stained chromosome, read in a gene address after the region',xtra:true},
  {lv:2,w:'KARYOTYPE',clue:'An organized picture of a person’s chromosomes, sorted into pairs'},
  {lv:2,w:'AUTOSOME',clue:'Any chromosome in pairs 1 through 22'},
  {lv:2,w:'TRISOMY',clue:'Having three copies of a chromosome instead of two'},
  {lv:2,w:'MONOSOMY',clue:'Having only one copy of a chromosome instead of two'},
  {lv:2,w:'HOMOLOG',clue:'A chromosome’s matching partner, from the other parent'},
  {lv:2,w:'ANEUPLOIDY',clue:'Having too many or too few chromosomes'},
+ {lv:2,w:'STAIN',clue:'The dye step that makes each chromosome’s bands show up'},
+ {lv:2,w:'BANDING',clue:'The striped pattern that is the best clue when two chromosomes are the same size'},
+ {lv:2,w:'ZYGOTE',clue:'The first cell of a new person, made when an egg and a sperm join'},
  {lv:2,w:'ACROCENTRIC',clue:'Describes a chromosome whose centromere sits near one tip',long:true},
- {lv:2,w:'METACENTRIC',clue:'Describes a chromosome whose centromere sits near the middle',long:true}];
+ {lv:2,w:'METACENTRIC',clue:'Describes a chromosome whose centromere sits near the middle',long:true},
+ {lv:3,w:'SYNDROME',clue:'A group of traits that tend to show up together, like those from trisomy 21'},
+ {lv:3,w:'NOTATION',clue:'The short code for a karyotype, such as 47,XY,+21'},
+ {lv:3,w:'TURNER',clue:'The syndrome with only one X and no second sex chromosome (45,X)'},
+ {lv:3,w:'EDWARDS',clue:'The syndrome caused by an extra chromosome 18'},
+ {lv:3,w:'PATAU',clue:'The syndrome caused by an extra chromosome 13'}];
+// a word this student hasn't seen lately, so replays (and the student next door) rarely get the same one
+function freshWord(pool){const seen=(S&&S.recentW)||[],skip=seen.slice(0,Math.ceil(pool.length*.6)),p=pool.filter(v=>!skip.includes(v.w)),w=pick(p.length?p:pool);
+  if(S){S.recentW=[w.w,...seen.filter(x=>x!==w.w)].slice(0,16);save()}return w}
 const INV_PAIRS=[['Chromatin','Loosely packed DNA in a cell doing its everyday work'],['Chromosome','DNA coiled tightly into a compact body before a cell divides'],['Sister chromatid','One of the two identical halves of a copied chromosome'],['Centromere','The pinched point where sister chromatids are held together'],['Telomere','The protective cap at each end of a chromosome'],['p arm','The short arm of a chromosome, above the centromere'],['q arm','The long arm of a chromosome, below the centromere'],['Locus','The exact spot where a gene sits on a chromosome'],['Band','A light or dark stripe left by stain, used in gene addresses'],['Nucleus','The part of a cell that holds its DNA']];
 const CAT_QS=[
  ['Pairs 1 through 22 are called…',['Autosomes','Sex chromosomes','Sister chromatids'],'Pairs 1–22 are autosomes. Pair 23 holds the sex chromosomes.'],
@@ -3384,7 +3511,7 @@ function invaders(el,{pairs=INV_PAIRS,goal=8,onWin,key='invaders'}={}){
     if(G.shot){ctx.fillStyle='#E3B455';ctx.shadowColor='#E3B455';ctx.shadowBlur=10;ctx.beginPath();ctx.arc(G.shot.x,G.shot.y,4,0,7);ctx.fill();ctx.shadowBlur=0}
     G.parts.forEach(p=>{ctx.globalAlpha=Math.max(0,p.l);ctx.fillStyle=p.c;ctx.fillRect(p.x-2,p.y-2,4,4)});ctx.globalAlpha=1;
     if(G.banner){ctx.font=`700 15px ${GFONT}`;ctx.textAlign='center';ctx.textBaseline='middle';const tw=Math.min(W-24,ctx.measureText(G.banner.txt).width+28);ctx.fillStyle='rgba(11,22,38,.85)';rrect(ctx,(W-tw)/2,H-112,tw,30,15);ctx.fill();ctx.fillStyle=G.banner.col;ctx.fillText(G.banner.txt,W/2,H-97,W-40)}};
-  const loop=ts=>{const dt=Math.min(.05,(ts-last)/1000||0);last=ts;if(el.offsetParent!==null){if(!W)size();update(dt);draw(ts/1000)}raf=requestAnimationFrame(loop)};
+  const loop=ts=>{raf=requestAnimationFrame(loop);const dt=Math.min(.05,(ts-last)/1000||0);last=ts;if(el.offsetParent!==null){if(!W)size();update(dt);draw(ts/1000)}};
   const pos=e=>{const r=cv.getBoundingClientRect();return e.clientX-r.left};let down=false;
   cv.addEventListener('pointerdown',e=>{if(G.state!=='play')return;e.preventDefault();down=true;const px=pos(e),py=e.clientY-cv.getBoundingClientRect().top;const hit=G.inv.map((v,i)=>[v,...layout(i)]).find(([v,x,y])=>v.alive&&px>=x-6&&px<=x+G.cw+6&&py>=y-10&&py<=y+46);G.lock=hit?hit[0]:null;G.ship.tx=hit?Math.max(22,Math.min(W-22,hit[1]+G.cw/2)):px;G.fireQ=true});
   cv.addEventListener('pointermove',e=>{if(down&&G.state==='play')G.ship.tx=pos(e)});
@@ -3450,7 +3577,7 @@ function catapult(el,{qs,onWin,key='catapult'}={}){
     if(G.ball)ball(G.ball.x,G.ball.y);
     G.parts.forEach(p=>{ctx.globalAlpha=Math.max(0,p.l);ctx.fillStyle=p.c;ctx.fillRect(p.x-3,p.y-3,6,6)});ctx.globalAlpha=1;
     if(G.banner){ctx.font=`700 20px ${GFONT}`;ctx.textAlign='center';ctx.textBaseline='middle';const tw=Math.min(WW-30,ctx.measureText(G.banner.txt).width+34);ctx.fillStyle='rgba(255,255,255,.92)';rrect(ctx,(WW-tw)/2,18,tw,40,20);ctx.fill();ctx.strokeStyle=G.banner.col;ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=G.banner.col;ctx.fillText(G.banner.txt,WW/2,38,WW-50)}};
-  const loop=ts=>{const dt=Math.min(.04,(ts-last)/1000||0);last=ts;if(el.offsetParent!==null){if(!W)size();update(dt);draw()}raf=requestAnimationFrame(loop)};
+  const loop=ts=>{raf=requestAnimationFrame(loop);const dt=Math.min(.04,(ts-last)/1000||0);last=ts;if(el.offsetParent!==null){if(!W)size();update(dt);draw()}};
   const wpt=e=>{const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)/u,y:(e.clientY-r.top)/u}};
   cv.addEventListener('pointerdown',e=>{if(G.state!=='play'||G.ball)return;const p=wpt(e);const [ax,ay]=anchor();if(Math.hypot(p.x-ax,p.y-ay)>170&&p.x>WW*.45)return;e.preventDefault();G.kb.on=false;G.aim=p;cv.setPointerCapture&&cv.setPointerCapture(e.pointerId)});
   cv.addEventListener('pointermove',e=>{if(G.aim)G.aim=wpt(e)});
@@ -3465,13 +3592,14 @@ function catapult(el,{qs,onWin,key='catapult'}={}){
 }
 
 /* ---------- lesson wrappers: the task completes when the student wins ---------- */
-function lessonWord(el,kind,{first,lv=1}={}){
+function lessonWord(el,kind,{pool,lv=1}={}){
+  pool=(pool||VOCAB.filter(v=>v.lv===lv)).filter(v=>kind!=='wordle'||!v.long);
   const fin=task(el);let used=new Set();
   const play=w=>{used.add(w.w);const box=document.createElement('div');el.innerHTML='';el.appendChild(box);const after=document.createElement('div');after.className='g-after';el.appendChild(after);
     const end=r=>{if(r.solved){fin();after.innerHTML=`<div class="fbbox ok"><strong>${kind==='wordle'?'Solved!':'Chromosome saved!'}</strong> <span><b>${w.w[0]+w.w.slice(1).toLowerCase()}</b> · ${w.clue}.</span></div>`}
-      else{after.innerHTML=`<div class="fbbox no"><strong>So close.</strong> <span>Each round is a new word. Win one to continue.</span></div><button type="button" class="btn">Try a new word</button>`;$('button',after).onclick=()=>{const pool=VOCAB.filter(v=>v.lv===lv&&!used.has(v.w)&&(kind!=='wordle'||!v.long));play(pick(pool.length?pool:VOCAB.filter(v=>v.lv===lv&&!v.long)))}}};
+      else{after.innerHTML=`<div class="fbbox no"><strong>So close.</strong> <span>Each round is a new word. Win one to continue.</span></div><button type="button" class="btn">Try a new word</button>`;$('button',after).onclick=()=>{const p=pool.filter(v=>!used.has(v.w));play(freshWord(p.length?p:pool))}}};
     if(kind==='wordle')wordle(box,{word:w.w,clue:w.clue,onEnd:end});else telomereGame(box,{word:w.w,clue:w.clue,onEnd:end})};
-  play(first?VOCAB.find(v=>v.w===first):pick(VOCAB.filter(v=>v.lv===lv)));
+  play(freshWord(pool));
 }
 function lessonArcade(el,kind){const fin=task(el);
   const done=()=>{fin();const a=el.parentNode.querySelector('.g-after');if(a)a.innerHTML='<div class="fbbox ok"><strong>Game cleared.</strong> Its word bank is now in My Notes, and you can replay it anytime from the Arcade on the shift board.</div>'};
@@ -3497,12 +3625,12 @@ SCREENS.arcade=(app,{g})=>{
   app.innerHTML=`<div class="arc-page"><div class="hub-head"><div class="stack" style="gap:6px"><p class="kicker">Arcade · practice mode</p><h1 style="font-size:clamp(1.7rem,5vw,2.4rem)">${a.t}</h1><p class="muted">${a.d} Practice games don’t change your score.</p></div><button class="btn ghost" id="arcBack" type="button">Back to shift board</button></div><div id="arcGame"></div><div class="g-after" id="arcAfter"></div></div>`;
   $('#arcBack').onclick=()=>go('hub');const box=$('#arcGame'),after=$('#arcAfter');
   const win=()=>{S.arcade[g]=(S.arcade[g]||0)+1;save()};
-  const words=()=>VOCAB.filter(v=>lvs.includes(v.lv)&&(g!=='wordle'||!v.long));
+  const words=()=>VOCAB.filter(v=>(lvs.includes(v.lv)||v.lv===3&&S.lv[3].learned)&&(g!=='wordle'||!v.long));
   const again=f=>{after.innerHTML=`<button type="button" class="btn">Play another</button>`;$('button',after).onclick=()=>{after.innerHTML='';f()}};
   const run=()=>{if(g==='invaders')invaders(box,{});
     else if(g==='catapult')catapult(box,{qs:shuffle(CAT_QS).slice(0,6)});
-    else if(g==='wordle'){const w=pick(words());wordle(box,{word:w.w,clue:w.clue,onEnd:r=>{if(r.solved)win();again(run)}})}
-    else if(g==='telomere'){const w=pick(words());telomereGame(box,{word:w.w,clue:w.clue,onEnd:r=>{if(r.solved)win();again(run)}})}
+    else if(g==='wordle'){const w=freshWord(words());wordle(box,{word:w.w,clue:w.clue,onEnd:r=>{if(r.solved)win();again(run)}})}
+    else if(g==='telomere'){const w=freshWord(words());telomereGame(box,{word:w.w,clue:w.clue,onEnd:r=>{if(r.solved)win();again(run)}})}
     else connections(box,{groups:CONN[pick(lvs)],onEnd:r=>{if(r.found===4)win();again(run)}})};
   run();
 };
@@ -3583,9 +3711,11 @@ function ambSprites(){
   return ids.map((id,i)=>{const [b,st,ed]=pal[i%3];let svg=chrSVG(id,{scale:.62,w:18,copy:i%2});
     svg=svg.replace(/var\(--chr-body\)/g,b).replace(/var\(--stain\)/g,st).replace(/var\(--chr-edge\)/g,ed).replace(/var\(--[a-z-]+\)/g,ed);
     if(!/xmlns=/.test(svg))svg=svg.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" ');
-    const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);return img});
+    // drawn to a bitmap once: redrawing an SVG picture every frame is what made the background stutter on slower computers
+    const sp={c:null,w:0,h:0},img=new Image();img.onload=()=>{const k=1.6,c=document.createElement('canvas');c.width=Math.ceil(img.naturalWidth*k);c.height=Math.ceil(img.naturalHeight*k);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);Object.assign(sp,{c,w:img.naturalWidth,h:img.naturalHeight});if((reduced||AMB.calm)&&AMB.cv){cancelAnimationFrame(AMB.still);AMB.still=requestAnimationFrame(()=>ambDraw(0))}};img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);return sp});
 }
-function ambSize(){const c=AMB.cv;AMB.dpr=Math.min(2,devicePixelRatio||1);AMB.W=innerWidth;AMB.H=innerHeight;c.width=AMB.W*AMB.dpr;c.height=AMB.H*AMB.dpr;AMB.ctx.setTransform(AMB.dpr,0,0,AMB.dpr,0,0)}
+function ambSize(){const c=AMB.cv;AMB.dpr=1;AMB.W=innerWidth;AMB.H=innerHeight;c.width=AMB.W*AMB.dpr;c.height=AMB.H*AMB.dpr;AMB.ctx.setTransform(AMB.dpr,0,0,AMB.dpr,0,0)}
 function ambSeed(mode){
   const M=AMB_MODES[mode]||AMB_MODES.learn,area=Math.min(1.4,Math.max(.45,AMB.W*AMB.H/(1200*800)));const n=k=>Math.round(M[k]*area);const it=[];
   for(let i=0;i<n('chr');i++){const d=.3+R()*.7;it.push({k:'chr',x:R()*AMB.W,y:R()*AMB.H,vx:(R()-.5)*10*d,vy:(-4-R()*10)*d,r:R()*6.28,vr:(R()-.5)*.25,s:.55+d*.9,d,img:AMB.spr[Math.floor(R()*AMB.spr.length)],a:.45+d*.55})}
@@ -3593,7 +3723,7 @@ function ambSeed(mode){
   for(let i=0;i<n('dna');i++){const d=.3+R()*.5;it.push({k:'dna',x:R()*AMB.W,y:R()*AMB.H,vx:(R()-.5)*8,vy:(R()-.5)*8,len:160+R()*220,ang:R()*6.28,va:(R()-.5)*.05,ph:R()*6.28,d})}
   AMB.items=it.sort((a,b)=>a.d-b.d);AMB.alpha=M.a;
 }
-function ambMode(mode){if(!AMB.cv||AMB.mode===mode)return;AMB.mode=mode;ambSeed(mode);if(reduced)ambDraw(0)}
+function ambMode(mode){if(!AMB.cv||AMB.mode===mode)return;AMB.mode=mode;ambSeed(mode);if(reduced||AMB.calm)ambDraw(0)}
 function ambDraw(t){
   const {ctx,W,H}=AMB;ctx.clearRect(0,0,W,H);const dark=matchMedia('(prefers-color-scheme: dark)').matches&&document.documentElement.dataset.theme!=='light';
   const px=(AMB.mx-.5),py=(AMB.my-.5);
@@ -3604,15 +3734,19 @@ function ambDraw(t){
     else if(o.k==='dna'){const x=o.x+ox,y=o.y+oy,c=Math.cos(o.ang),s=Math.sin(o.ang),L=o.len,amp=11;ctx.globalAlpha=AMB.alpha*.9*o.d;ctx.lineWidth=2;
       for(const [col,sh] of [[dark?'#CDB9F5':'#7E57C2',0],[dark?'#7CC0EE':'#4B9CD3',Math.PI]]){ctx.strokeStyle=col;ctx.beginPath();for(let i=0;i<=40;i++){const u=i/40*L-L/2,w=Math.sin(u/22+t*.0012+o.ph+sh)*amp;const X=x+c*u-s*w,Y=y+s*u+c*w;i?ctx.lineTo(X,Y):ctx.moveTo(X,Y)}ctx.stroke()}
       ctx.strokeStyle=dark?'rgba(227,180,85,.7)':'rgba(180,83,26,.55)';ctx.lineWidth=1.4;ctx.beginPath();for(let i=0;i<=40;i+=2){const u=i/40*L-L/2,w=Math.sin(u/22+t*.0012+o.ph)*amp;ctx.moveTo(x+c*u-s*w,y+s*u+c*w);ctx.lineTo(x+c*u+s*w,y+s*u-c*w)}ctx.stroke()}
-    else if(o.img.complete&&o.img.naturalWidth){const w=o.img.naturalWidth*o.s,h=o.img.naturalHeight*o.s;ctx.save();ctx.globalAlpha=AMB.alpha*o.a*(dark?.85:1);ctx.translate(o.x+ox,o.y+oy);ctx.rotate(o.r);ctx.drawImage(o.img,-w/2,-h/2,w,h);ctx.restore()}}
+    else if(o.img.c){const w=o.img.w*o.s,h=o.img.h*o.s;ctx.save();ctx.globalAlpha=AMB.alpha*o.a*(dark?.85:1);ctx.translate(o.x+ox,o.y+oy);ctx.rotate(o.r);ctx.drawImage(o.img.c,-w/2,-h/2,w,h);ctx.restore()}}
   ctx.globalAlpha=1;
 }
-function ambStep(ts){const dt=Math.min(.08,(ts-AMB.last)/1000||0);if(ts-AMB.last<30){AMB.raf=requestAnimationFrame(ambStep);return}AMB.last=ts;
+// the background books its next frame first, and on a slow computer it redraws less often so lessons and games stay smooth.
+// If the whole page still runs under about 24 frames a second, the background holds still for the rest of the visit.
+function ambStep(ts){AMB.raf=requestAnimationFrame(ambStep);
+  const gap=ts-(AMB.pt||ts);AMB.pt=ts;
+  if(!document.hidden&&gap>0&&gap<500){(AMB.gaps||(AMB.gaps=[])).push(gap);if(AMB.gaps.length>=90){const m=AMB.gaps.sort((a,b)=>a-b)[45];AMB.gaps=[];if(m>42){AMB.calm=true;cancelAnimationFrame(AMB.raf);ambDraw(0);return}}}const dt=Math.min(.08,(ts-AMB.last)/1000||0);if(ts-AMB.last<(AMB.cost>6?90:AMB.cost>3?50:30))return;AMB.last=ts;
   if(!document.hidden){AMB.mx+=(AMB.tx-AMB.mx)*.04;AMB.my+=(AMB.ty-AMB.my)*.04;const {W,H}=AMB,m=120;
     for(const o of AMB.items){o.x+=o.vx*dt;o.y+=o.vy*dt;if(o.vr)o.r+=o.vr*dt;if(o.va)o.ang+=o.va*dt;
       if(o.x<-m)o.x=W+m;if(o.x>W+m)o.x=-m;if(o.y<-m)o.y=H+m;if(o.y>H+m)o.y=-m}
-    ambDraw(ts)}
-  AMB.raf=requestAnimationFrame(ambStep)}
+    const t0=performance.now();ambDraw(ts);AMB.cost=(AMB.cost||0)*.9+(performance.now()-t0)*.1}}
+function ambRestart(){if(!AMB.cv)return;cancelAnimationFrame(AMB.raf);if(!reduced&&!AMB.calm)AMB.raf=requestAnimationFrame(ambStep);else ambDraw(0)}
 function ambInit(){
   const c=document.createElement('canvas');c.id='amb';c.setAttribute('aria-hidden','true');document.body.prepend(c);AMB.cv=c;AMB.ctx=c.getContext('2d');AMB.spr=ambSprites();ambSize();
   addEventListener('resize',()=>{const m=AMB.mode;ambSize();AMB.mode='';ambMode(m)});
@@ -3645,6 +3779,8 @@ setInterval(()=>{const m=$('#martyBtn .marty');if(m&&!XOPEN&&!reduced&&!document
 migrateNotes();save();
 ambInit();
 render();
+// this computer asks for less motion: say once that animations are on, and where to switch them off
+try{if(OS_REDUCE&&localStorage.getItem(MOTION_KEY)===null){localStorage.setItem(MOTION_KEY,'full');setTimeout(()=>toast('Animations are on. For still pictures instead, open Contents (after you sign in) and turn Animations off.',7000),1200)}}catch(e){}
 </script>
 
 </body>
