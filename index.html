@@ -1565,12 +1565,7 @@ function chrGeo(id,scale,W,copy,single){
       const r=cw*.55;if(y<r)v*=Math.sqrt(Math.max(0,1-Math.pow((r-y)/r,2)));if(y>h-r)v*=Math.sqrt(Math.max(0,1-Math.pow((y-(h-r))/r,2)));return Math.max(0,v)};
     const L=[],Rr=[];for(let y=0;y<=h+.001;y+=step){const c=cx(y),v=hw(y);L.push([c-v,y]);Rr.push([c+v,y])}
     const out='M'+L.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join('L')+'L'+Rr.reverse().map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join('L')+'Z';
-    // the coil: thread winding back and forth across the chromatid
-    const pitch=Math.max(1.6,cw*.5),n=Math.ceil(h/pitch*7);let d1='',d2='';
-    for(let i=0;i<=n;i++){const y=i/n*h,a=y/pitch*Math.PI*2+Math.sin(y/cw*1.7+ph[2])*.8,c=cx(y),v=hw(y)*.9*(1+.12*Math.sin(y*1.3+k));
-      const yy=Math.min(h,Math.max(0,y+Math.cos(a)*pitch*.22));d1+=(i?'L':'M')+(c+Math.sin(a)*v).toFixed(1)+','+yy.toFixed(1);
-      const b=a+1.5;d2+=(i?'L':'M')+(c+Math.sin(b)*v*.8).toFixed(1)+','+Math.min(h,Math.max(0,y+Math.cos(b)*pitch*.22)).toFixed(1)}
-    chs.push({out,d1,d2});
+    chs.push({out});
   }
   return GEO[key]={h,cw,cen,chs};
 }
@@ -1578,13 +1573,12 @@ function chrSVG(id,{scale=.44,w=12,copy=0,mark=false,single=false,plain=false}={
   const W=w,g=chrGeo(id,scale,W,copy,single),h=g.h,cy=g.cen;
   const cid='cp'+(++clipN);const rng=mulberry32((copy+1)*7919+id.length*31+(CHR[id][0]|0));
   const bands=bandsFor(id).map(([s,e,o])=>`<rect x="0" y="${(s*h).toFixed(1)}" width="${W}" height="${((e-s)*h).toFixed(1)}" opacity="${(Math.min(1,Math.max(.3,o+(rng()-.5)*.12))*(plain?1:.78)).toFixed(2)}"/>`).join('');
-  const sw=Math.max(.4,g.cw*.09).toFixed(2),sw2=Math.max(.3,g.cw*.065).toFixed(2);
   const py=1.5,px=mark?18:1.5;
   const mk=mark?`<line x1="-12" x2="${W+12}" y1="${cy}" y2="${cy}" stroke="var(--mark)" stroke-width="1.4" stroke-dasharray="3 2"/><text x="${W+6}" y="${Math.max(8,cy-4)}" font-size="10" font-weight="600" fill="var(--mark)" font-family="IBM Plex Mono,monospace">p</text><text x="${W+6}" y="${cy+13}" font-size="10" font-weight="600" fill="var(--mark)" font-family="IBM Plex Mono,monospace">q</text>`:'';
   const outs=g.chs.map(c=>c.out).join('');
   const kin=single?'':`<ellipse cx="${W/2}" cy="${cy.toFixed(1)}" rx="${(g.cw*.3).toFixed(1)}" ry="${(g.cw*.18).toFixed(1)}" fill="var(--chr-edge)" opacity=".75"/>`;
   const vw=W+2*px,vh=h+2*py;
-  return `<svg class="chr" viewBox="${-px} ${-py} ${vw.toFixed(1)} ${vh.toFixed(1)}" width="${vw.toFixed(1)}" height="${vh.toFixed(1)}" aria-hidden="true"><defs><clipPath id="${cid}"><path d="${outs}"/></clipPath></defs><path d="${outs}" fill="var(--chr-body)"/><g clip-path="url(#${cid})"><g class="bands" fill="var(--stain)">${bands}</g>${plain?g.chs.map(c=>`<path d="${c.out}" fill="none" stroke="#ffffff" stroke-width="${(g.cw*.22).toFixed(1)}" opacity=".22" transform="translate(${(-g.cw*.18).toFixed(1)} 0)"/>`).join(''):`<g fill="none" stroke-linecap="round" stroke-linejoin="round">${g.chs.map(c=>`<path d="${c.d1}" stroke="var(--stain)" stroke-width="${sw}" opacity=".6"/><path d="${c.d2}" stroke="#ffffff" stroke-width="${sw2}" opacity=".3"/>`).join('')}</g>`}</g><path d="${outs}" fill="none" stroke="var(--chr-edge)" stroke-width=".8" stroke-linejoin="round"/>${kin}${mk}</svg>`;
+  return `<svg class="chr" viewBox="${-px} ${-py} ${vw.toFixed(1)} ${vh.toFixed(1)}" width="${vw.toFixed(1)}" height="${vh.toFixed(1)}" aria-hidden="true"><defs><clipPath id="${cid}"><path d="${outs}"/></clipPath></defs><path d="${outs}" fill="var(--chr-body)"/><g clip-path="url(#${cid})"><g class="bands" fill="var(--stain)">${bands}</g>${g.chs.map(c=>`<path d="${c.out}" fill="none" stroke="#ffffff" stroke-width="${(g.cw*.22).toFixed(1)}" opacity=".22" transform="translate(${(-g.cw*.18).toFixed(1)} 0)"/>`).join('')}</g><path d="${outs}" fill="none" stroke="var(--chr-edge)" stroke-width=".8" stroke-linejoin="round"/>${kin}${mk}</svg>`;
 }
 const SC=()=>innerWidth<560?{kg:.3,w:12,big:.72,bw:20}:{kg:.42,w:16,big:.92,bw:26};
 function normalLayout(sex){const L={};AUTOS.forEach(a=>L[a]=[{chr:a,copy:0},{chr:a,copy:1}]);L.SEX=sex==='M'?[{chr:'X',copy:0},{chr:'Y',copy:0}]:[{chr:'X',copy:0},{chr:'X',copy:1}];return L}
