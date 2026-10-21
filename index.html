@@ -618,6 +618,11 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .sperm .nd-chr{background:#E2EFFA;border-color:#7FB0D8;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;min-width:52px;min-height:52px}
 .zyg .nd-chr{background:#F4F0FA;border-color:var(--chr-edge);min-width:86px}
 .nd-empty{font:600 .7rem var(--font-mono);opacity:.6}
+.nd-none{font:600 10px var(--font-mono);fill:var(--lightbox-ink);opacity:.6}
+.nd-src{align-items:center;gap:6px}.nd-src .mono{color:var(--lightbox-ink);opacity:.75;margin-right:2px}
+.nd-src button{padding:6px 12px;font-size:.85rem;background:var(--lightbox);color:var(--lightbox-ink);border-color:var(--lightbox-line)}
+.nd-src button[aria-pressed="true"]{background:var(--accent-ink);color:#fff;border-color:var(--accent-ink)}
+.nd-rows{display:grid;gap:10px}
 .nd-op{font:800 1.4rem/1 var(--font-display);color:var(--lightbox-ink)}
 .nd-tag{font:700 .9rem/1.2 var(--font-display);color:var(--lightbox-ink)}
 @media (max-width:640px){.nd-row{grid-template-columns:auto auto auto auto auto}.nd-tag{grid-column:1/-1}}
@@ -714,6 +719,12 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .lbox .dchip{font-size:clamp(.62rem,2.2vw,.85rem)}
 .lbox.wrongc{border:2px solid var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--lightbox))}
 .uns{display:grid;gap:16px}
+.uns-type{display:grid;gap:6px;justify-items:start}
+.uns-lab{display:inline-flex;align-items:center;gap:6px;font-weight:700}.uns-lab .ic{width:18px;height:18px;color:var(--accent-ink)}
+.uns-in{font:800 1.35rem/1.2 var(--font-mono);letter-spacing:.18em;text-transform:uppercase;padding:10px 14px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--ink);width:min(100%,24ch)}
+.uns-in:focus{outline:none;border-color:var(--accent-ink);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.uns-in:disabled{opacity:.7}
+.uns-msg{color:var(--bad);min-height:1.2em}
 .uns-slots,.uns-bank{display:flex;flex-wrap:wrap;gap:6px}
 .lslot{width:44px;height:52px;border-radius:10px;border:2px dashed var(--accent);background:var(--surface-2);display:grid;place-items:center}
 .lslot.over{border-style:solid;background:var(--accent-soft)}
@@ -997,7 +1008,8 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 /* nondisjunction animation */
 .sperm-fig{display:block;width:136px;height:auto}
 .nda{display:grid;gap:10px}
-.nda-ctrl{display:flex;gap:8px;flex-wrap:wrap}
+.nda-ctrls{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:center}
+.nda-ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.nda-ctrl .mono{color:var(--muted)}
 .nda-ctrl button{font:700 .95rem/1 var(--font-body);padding:10px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .nda-ctrl button:hover{border-color:var(--accent)}
 .nda-ctrl button[aria-pressed="true"]{background:var(--accent-ink);color:var(--on-accent);border-color:var(--accent-ink)}
@@ -1005,7 +1017,8 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .nda-svg{width:100%;height:auto;display:block}
 .nda-t{font:600 12px var(--font-mono);fill:var(--lightbox-ink);opacity:.65;letter-spacing:.06em;text-transform:uppercase}
 .nda-parent{transition:opacity .6s}
-.nda-egg{opacity:0}.nda-egg circle{transition:fill .8s,stroke .8s}.nda-svg.done .nda-egg.chosen circle{fill:#F1ECFA;stroke:#8A6BC9}
+.nda-gam{opacity:0}.nda-svg circle{transition:fill .8s,stroke .8s}.nda-svg.done .chosen circle{fill:#F1ECFA;stroke:#8A6BC9}
+.nda-lab1{transition:opacity .5s}
 .nda-lab{font:700 14px var(--font-body);fill:var(--lightbox-ink)}
 .nda-lab1{transition:opacity .5s}.nda-svg.split .nda-lab1{opacity:0}
 .nda-oops{font:800 14px var(--font-display);fill:var(--mark);opacity:0;transition:opacity .4s}
@@ -2680,14 +2693,25 @@ function mountCloze(body,{parts,words},ready){
 }
 function mountUnscramble(body,{word},ready){
   let letters;do{letters=shuffle(word.split(''))}while(letters.join('')===word);
-  body.innerHTML=`<div class="uns"><div class="uns-slots">${word.split('').map((_,i)=>`<span class="lslot" data-i="${i}"></span>`).join('')}</div><div class="uns-bank">${letters.map((c,i)=>`<button type="button" class="tile" data-i="${i}">${c}</button>`).join('')}</div><div class="row"><button class="btn ghost sm" type="button" data-clear>Clear</button><span class="small muted">Tap letters in order, or drag them into the boxes. Tap a placed letter to send it back.</span></div></div>`;
-  const slots=$$('.lslot',body),bank=$('.uns-bank',body);let locked=false;
-  const sync=()=>ready(slots.every(s=>$('.tile',s)));
+  const uid='uns'+(++clipN);
+  body.innerHTML=`<div class="uns"><div class="uns-type"><label for="${uid}" class="uns-lab">${IC.letters}<span>Type your answer</span></label><input id="${uid}" class="uns-in" type="text" maxlength="${word.length}" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" inputmode="text" aria-describedby="${uid}m"><span class="uns-msg small" id="${uid}m" aria-live="polite"></span></div><div class="uns-slots" aria-hidden="true">${word.split('').map((_,i)=>`<span class="lslot" data-i="${i}"></span>`).join('')}</div><div class="uns-bank">${letters.map((c,i)=>`<button type="button" class="tile" data-i="${i}">${c}</button>`).join('')}</div><div class="row"><button class="btn ghost sm" type="button" data-clear>Clear</button><span class="small muted">Type the word, or tap letters in order, or drag them into the boxes. Tap a placed letter to send it back.</span></div></div>`;
+  const slots=$$('.lslot',body),bank=$('.uns-bank',body),inp=$('.uns-in',body),msg=$('.uns-msg',body);let locked=false;
+  // the typing box and the letter tiles always show the same answer
+  const typed=()=>slots.map(s=>($('.tile',s)||{}).textContent||'').join('');
+  const sync=()=>{inp.value=typed();ready(slots.every(s=>$('.tile',s)))};
+  inp.addEventListener('input',()=>{if(locked)return;const want=inp.value.toUpperCase().replace(/[^A-Z]/g,'');let keep='',miss='';
+    $$('.lslot .tile',body).forEach(t=>toBank(t));
+    for(const c of want){const t=$$('.tile',bank).find(x=>x.textContent===c);const sl=slots.find(x=>!$('.tile',x));if(t&&sl){sl.appendChild(t);keep+=c}else if(!t)miss=c}
+    if(inp.value!==keep){const pos=keep.length;inp.value=keep;inp.setSelectionRange(pos,pos)}
+    msg.textContent=miss?`There’s no ${$$('.tile',body).some(x=>x.textContent===miss)?'other ':''}${miss} left in the scramble.`:'';
+    if(miss&&!reduced){inp.classList.remove('shake');void inp.offsetWidth;inp.classList.add('shake')}
+    ready(slots.every(s=>$('.tile',s)))});
+  inp.addEventListener('blur',()=>{inp.value=typed()});
   const toBank=t=>{const i=+t.dataset.i;const after=$$('.tile',bank).find(x=>+x.dataset.i>i);after?bank.insertBefore(t,after):bank.appendChild(t)};
   const place=(t,slot)=>{const old=$('.tile',slot);if(old&&old!==t)toBank(old);slot.appendChild(t);t.classList.add('pop');setTimeout(()=>t.classList.remove('pop'),250);sync()};
   dragKit(body,{item:'.tile',zone:'.lslot,.uns-bank',onTap:t=>{if(locked)return;if(t.parentElement.classList.contains('lslot')){toBank(t);sync()}else{const s=slots.find(x=>!$('.tile',x));if(s)place(t,s)}},onDrop:(t,z)=>{if(locked)return;if(z.classList.contains('lslot'))place(t,z);else{toBank(t);sync()}}});
-  $('[data-clear]',body).onclick=()=>{if(locked)return;$$('.lslot .tile',body).forEach(toBank);sync()};
-  return {check(){locked=true;const got=slots.map(s=>($('.tile',s)||{}).textContent||'').join('');const ok=got===word;slots.forEach((s,i)=>s.classList.add(s.textContent===word[i]?'right':'wrongc'));$('[data-clear]',body).closest('.row').hidden=true;return {pts:ok?1:0,max:1,got}}};
+  $('[data-clear]',body).onclick=()=>{if(locked)return;$$('.lslot .tile',body).forEach(toBank);msg.textContent='';sync();inp.value=''};
+  return {check(){locked=true;inp.disabled=true;msg.textContent='';const got=slots.map(s=>($('.tile',s)||{}).textContent||'').join('');const ok=got===word;slots.forEach((s,i)=>s.classList.add(s.textContent===word[i]?'right':'wrongc'));$('[data-clear]',body).closest('.row').hidden=true;return {pts:ok?1:0,max:1,got}}};
 }
 function mountOrder(body,{items},ready){
   let idx;do{idx=shuffle(items.map((_,i)=>i))}while(idx.every((v,i)=>v===i));
@@ -3050,60 +3074,86 @@ function labAnim(el,sex,onFinish){
 /* sperm cell with a flagellum, carrying one chromosome 21 */
 // a small M or D on mom's and dad's chromosomes, shown in color-blind-friendly mode
 const mdTag=(who,x,y,size)=>`<text class="mdt ${who}" x="${x}" y="${y}" style="font-size:${size}px">${who==='mat'?'M':'D'}</text>`;
-function spermFig(){
-  const h=chrH('21',.62,14);let t1='',t2='';for(let i=0;i<=36;i++){const x=64+i*1.9,a=Math.min(1,i/6)*6;t1+=(i?'L':'M')+x.toFixed(1)+','+(32+Math.sin(i/36*Math.PI*3)*a).toFixed(1);t2+=(i?'L':'M')+x.toFixed(1)+','+(32-Math.sin(i/36*Math.PI*3)*a).toFixed(1)}
-  return noMotion(`<svg class="sperm-fig" viewBox="0 0 136 64" width="136" height="64" aria-hidden="true"><path d="${t1}" fill="none" stroke="#7FB0D8" stroke-width="2.6" stroke-linecap="round"><animate attributeName="d" values="${t1};${t2};${t1}" dur=".8s" repeatCount="indefinite"/></path><rect x="46" y="28" width="20" height="8" rx="4" fill="#A9CDEB" stroke="#7FB0D8" stroke-width="1.4"/><ellipse cx="26" cy="32" rx="24" ry="21" fill="#E2EFFA" stroke="#7FB0D8" stroke-width="2.4"/><path d="M2,32A24,21 0 0 1 14,13.6Q8,32 14,50.4A24,21 0 0 1 2,32Z" fill="#B9D7F0" opacity=".7"/><g class="pat">${nestChr('21',{scale:.62,w:14,copy:2,single:true},17.5,32-h/2-1.5)}${mdTag('pat',25,32-h/2-3,7)}</g></svg>`);
+// chromosome 21 drawn the way it looks in a Level 3 karyotype: a copied chromosome (two sister chromatids) with stained bands
+const ND_W=16,ndChr=(copy,w=ND_W)=>chrSVG('21',{scale:.5,w,copy});
+function spermFig(n=1,start=2){
+  const w=13,h=chrH('21',.5,w);let t1='',t2='';for(let i=0;i<=36;i++){const x=64+i*1.9,a=Math.min(1,i/6)*6;t1+=(i?'L':'M')+x.toFixed(1)+','+(32+Math.sin(i/36*Math.PI*3)*a).toFixed(1);t2+=(i?'L':'M')+x.toFixed(1)+','+(32-Math.sin(i/36*Math.PI*3)*a).toFixed(1)}
+  const cw=w+3,x0=26-(n*cw+(n-1)*2)/2;
+  const chs=n?Array.from({length:n},(_,i)=>`<g class="pat">${nestChr('21',{scale:.5,w,copy:start+i},x0+i*(cw+2),32-h/2-1.5)}${mdTag('pat',x0+i*(cw+2)+cw/2,32-h/2-3,7)}</g>`).join(''):`<text x="26" y="35" text-anchor="middle" class="nd-none">none</text>`;
+  return noMotion(`<svg class="sperm-fig" viewBox="0 0 136 64" width="136" height="64" aria-hidden="true"><path d="${t1}" fill="none" stroke="#7FB0D8" stroke-width="2.6" stroke-linecap="round"><animate attributeName="d" values="${t1};${t2};${t1}" dur=".8s" repeatCount="indefinite"/></path><rect x="46" y="28" width="20" height="8" rx="4" fill="#A9CDEB" stroke="#7FB0D8" stroke-width="1.4"/><ellipse cx="26" cy="32" rx="24" ry="25" fill="#E2EFFA" stroke="#7FB0D8" stroke-width="2.4"/>${chs}</svg>`);
 }
+// the egg + sperm = zygote figure. The mistake can happen while the egg is made or while the sperm is made.
 function ndFigure(){
-  const m=(n,cls,start=0)=>Array.from({length:n},(_,i)=>`<span class="kchr ${cls}">${chrSVG('21',{scale:.62,w:14,copy:start+i,single:true})}</span>`).join('');
-  const row=(title,egg,res,tone)=>`<div class="nd-row ${tone}"><div class="nd-cell egg"><div class="nd-chr">${egg?m(egg,'mat'):'<span class="nd-empty">none</span>'}</div><span>Egg</span></div><span class="nd-op">+</span><div class="nd-cell sperm">${spermFig()}<span>Sperm</span></div><span class="nd-op">=</span><div class="nd-cell zyg"><div class="nd-chr">${m(egg,'mat')}${m(1,'pat',2)}</div><span><b>Zygote</b> · ${res}</span></div><b class="nd-tag">${title}</b></div>`;
-  return `<div class="lightbox nd"><div class="nd-head"><span class="legend"><i class="sw mat"></i>From mom <i class="sw pat"></i>From dad</span><span class="mono">Chromosome 21 only</span></div>${row('Typical',1,'2 copies','ok')}${row('Pair didn’t separate: egg got both',2,'3 copies · trisomy','tri')}${row('Pair didn’t separate: egg got none',0,'1 copy · monosomy','mono')}</div>`;
+  return `<div class="lightbox nd" data-src="egg"><div class="nd-head"><span class="legend"><i class="sw mat"></i>From mom <i class="sw pat"></i>From dad</span><div class="nd-src seg" role="group" aria-label="Where the pair didn’t separate"><span class="mono">Mistake in:</span><button type="button" data-src="egg" aria-pressed="true">Egg</button><button type="button" data-src="sperm" aria-pressed="false">Sperm</button></div><span class="mono">Chromosome 21 only</span></div><div class="nd-rows">${ndRows('egg')}</div></div>`;
 }
-/* animation: how an egg ends up with 2 or 0 copies, then fertilization */
+function ndRows(src){
+  const m=(n,cls,start=0)=>Array.from({length:n},(_,i)=>`<span class="kchr ${cls}">${ndChr(start+i)}</span>`).join('');
+  const row=(title,egg,sperm,res,tone)=>`<div class="nd-row ${tone}"><div class="nd-cell egg"><div class="nd-chr">${egg?m(egg,'mat'):'<span class="nd-empty">none</span>'}</div><span>Egg</span></div><span class="nd-op">+</span><div class="nd-cell sperm">${spermFig(sperm)}<span>Sperm</span></div><span class="nd-op">=</span><div class="nd-cell zyg"><div class="nd-chr">${m(egg,'mat')}${m(sperm,'pat',2)}</div><span><b>Zygote</b> · ${res}</span></div><b class="nd-tag">${title}</b></div>`;
+  const g=src==='egg'?'egg':'sperm',o=(two,none)=>src==='egg'?[two,1]:[1,two];
+  return row('Typical',1,1,'2 copies','ok')+row(`Pair didn’t separate: ${g} got both`,...o(2),'3 copies · trisomy','tri')+row(`Pair didn’t separate: ${g} got none`,...o(0),'1 copy · monosomy','mono');
+}
+function ndFigureBind(el){if(!el)return;
+  $$('.nd-src button',el).forEach(b=>b.onclick=()=>{const src=b.dataset.src;el.dataset.src=src;$$('.nd-src button',el).forEach(x=>x.setAttribute('aria-pressed',x===b));$('.nd-rows',el).innerHTML=ndRows(src)})}
+/* animation: how an egg or a sperm ends up with 2 or 0 copies, then fertilization */
 function ndAnim(el){
-  const fin=task(el),seen=new Set(),W=21,H=chrH('21',.9,18)+3;
-  const chr=(id,cls,copy)=>`<g class="nd-c ${cls}" data-c="${id}">${chrSVG('21',{scale:.9,w:18,copy,single:true})}${mdTag(cls,W/2,-2,9)}</g>`;
+  const fin=task(el),seen=new Set(),bySrc=new Set(),w=22,W=w+3,H=chrH('21',.7,w)+3;
+  let src='egg',timers=[],svg,cap,cs,gam,parent,mate,zl,lab1;
+  const chr=(id,cls,copy)=>`<g class="nd-c ${cls}" data-c="${id}">${chrSVG('21',{scale:.7,w,copy})}${mdTag(cls,W/2,-2,9)}</g>`;
   let t1='',t2='';for(let i=0;i<=40;i++){const x=38+i*2.2,a=Math.min(1,i/6)*7;t1+=(i?'L':'M')+x.toFixed(1)+','+(Math.sin(i/40*Math.PI*3)*a).toFixed(1);t2+=(i?'L':'M')+x.toFixed(1)+','+(-Math.sin(i/40*Math.PI*3)*a).toFixed(1)}
-  el.innerHTML=`<div class="nda"><div class="nda-ctrl" role="group" aria-label="Choose what happens"><button type="button" data-k="typ">Typical</button><button type="button" data-k="tri">Trisomy</button><button type="button" data-k="mono">Monosomy</button></div>
-   <div class="lightbox nda-stage"><svg viewBox="0 0 640 270" class="nda-svg" aria-hidden="true">
-    <text x="110" y="22" text-anchor="middle" class="nda-t">In the ovary</text><text x="400" y="22" text-anchor="middle" class="nda-t">Fertilization</text>
-    <circle class="nda-parent" cx="110" cy="135" r="62" fill="#FCE9F2" stroke="#D98BB0" stroke-width="3"/>
-    <g class="nda-egg" data-e="top"><circle r="44" fill="#FCE9F2" stroke="#D98BB0" stroke-width="3"/></g>
-    <g class="nda-egg" data-e="bot"><circle r="44" fill="#FCE9F2" stroke="#D98BB0" stroke-width="3"/></g>
-    <g class="nda-sperm">${noMotion(`<path d="${t1}" fill="none" stroke="#7FB0D8" stroke-width="3" stroke-linecap="round"><animate attributeName="d" values="${t1};${t2};${t1}" dur=".7s" repeatCount="indefinite"/></path>`)}<rect x="24" y="-5" width="16" height="10" rx="5" fill="#A9CDEB" stroke="#7FB0D8" stroke-width="1.4"/><ellipse cx="0" cy="0" rx="28" ry="27" fill="#E2EFFA" stroke="#7FB0D8" stroke-width="2.4"/></g>
-    ${chr('A','mat',0)}${chr('B','mat',1)}${chr('S','pat',2)}
-    <text x="110" y="258" text-anchor="middle" class="nda-lab nda-lab1">Egg-making cell: 2 copies</text>
+  // a sperm: head at the origin, tail trailing behind it (dir 1: tail to the right, -1: tail to the left)
+  const spermG=(cls,dir)=>`<g class="${cls}"><g transform="scale(${dir} 1)">${noMotion(`<path d="${t1}" fill="none" stroke="#7FB0D8" stroke-width="3" stroke-linecap="round"><animate attributeName="d" values="${t1};${t2};${t1}" dur=".7s" repeatCount="indefinite"/></path>`)}<rect x="24" y="-5" width="16" height="10" rx="5" fill="#A9CDEB" stroke="#7FB0D8" stroke-width="1.4"/><ellipse cx="0" cy="0" rx="30" ry="29" fill="#E2EFFA" stroke="#7FB0D8" stroke-width="2.4"/></g></g>`;
+  const eggG=(cls,extra='')=>`<g class="${cls}"${extra}><circle r="44" fill="#FCE9F2" stroke="#D98BB0" stroke-width="3"/></g>`;
+  el.innerHTML=`<div class="nda"><div class="nda-ctrls"><div class="nda-ctrl" role="group" aria-label="Where the mistake happens"><span class="mono">Mistake in:</span><button type="button" data-src="egg" aria-pressed="true">Egg</button><button type="button" data-src="sperm" aria-pressed="false">Sperm</button></div><div class="nda-ctrl" role="group" aria-label="Choose what happens"><button type="button" data-k="typ">Typical</button><button type="button" data-k="tri">Trisomy</button><button type="button" data-k="mono">Monosomy</button></div></div>
+   <div class="lightbox nda-stage"></div><p class="nda-cap" aria-live="polite"></p></div>`;
+  const stage=$('.nda-stage',el);cap=$('.nda-cap',el);
+  const draw=()=>{const E=src==='egg',own=E?'mat':'pat',oth=E?'pat':'mat';
+    stage.innerHTML=`<svg viewBox="0 0 640 270" class="nda-svg" aria-hidden="true">
+    <text x="110" y="22" text-anchor="middle" class="nda-t">${E?'In the ovary':'In the testis'}</text><text x="400" y="22" text-anchor="middle" class="nda-t">Fertilization</text>
+    <circle class="nda-parent" cx="110" cy="135" r="62" fill="${E?'#FCE9F2':'#E2EFFA'}" stroke="${E?'#D98BB0':'#7FB0D8'}" stroke-width="3"/>
+    ${E?eggG('nda-gam" data-e="top')+eggG('nda-gam" data-e="bot'):spermG('nda-gam" data-e="top',-1)+spermG('nda-gam" data-e="bot',-1)}
+    ${E?spermG('nda-mate',1):eggG('nda-mate')}
+    ${chr('A',own,0)}${chr('B',own,1)}${chr('S',oth,2)}
+    <text x="110" y="258" text-anchor="middle" class="nda-lab nda-lab1">${E?'Egg-making':'Sperm-making'} cell: 2 copies</text>
     <text x="400" y="258" text-anchor="middle" class="nda-lab nda-zlab"></text>
-    <text x="206" y="66" class="nda-oops" text-anchor="middle">Stuck together!</text></svg></div>
-   <p class="nda-cap" aria-live="polite">Pick an outcome to watch how it happens.</p></div>`;
-  const svg=$('.nda-svg',el),cap=$('.nda-cap',el),cs={},eggs={top:$('[data-e="top"]',el),bot:$('[data-e="bot"]',el)},sp=$('.nda-sperm',el),zl=$('.nda-zlab',el);
-  $$('.nd-c',el).forEach(n=>cs[n.dataset.c]=n);
-  let timers=[];const at=(ms,f)=>timers.push(setTimeout(f,reduced?0:ms));
+    <text x="${E?206:250}" y="66" class="nda-oops" text-anchor="middle">Stuck together!</text></svg>`;
+    svg=$('.nda-svg',el);cs={};$$('.nd-c',el).forEach(n=>cs[n.dataset.c]=n);gam={top:$('[data-e="top"]',el),bot:$('[data-e="bot"]',el)};mate=$('.nda-mate',el);zl=$('.nda-zlab',el);parent=$('.nda-parent',el);lab1=$('.nda-lab1',el)};
+  const at=(ms,f)=>timers.push(setTimeout(f,reduced?0:ms));
   const mv=(n,x,y,dur=1,op=1,delay=0)=>{n.style.transition=dur?`transform ${dur}s cubic-bezier(.5,0,.3,1) ${delay}s,opacity .5s`:'none';n.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;n.style.opacity=op};
-  const eg=(n,x,y,s,op,dur=1)=>{n.style.transition=dur?`transform ${dur}s cubic-bezier(.5,0,.3,1),opacity .6s`:'none';n.style.transform=`translate(${x}px,${y}px) scale(${s})`;n.style.opacity=op};
-  const spot=(list,cx,cy)=>list.forEach((k,i)=>mv(cs[k],cx-(list.length*W+(list.length-1)*4)/2+i*(W+4),cy-H/2,undefined));
-  const reset=()=>{timers.forEach(clearTimeout);timers=[];svg.classList.remove('split','oops','fert','done');Object.values(eggs).forEach(e=>e.classList.remove('chosen'));
-    $('.nda-parent',el).style.opacity=1;eg(eggs.top,110,135,.6,0,0);eg(eggs.bot,110,135,.6,0,0);
-    mv(cs.A,110-W-2,135-H/2,0);mv(cs.B,110+2,135-H/2,0);sp.style.transition='none';sp.style.transform='translate(700px,135px)';sp.style.opacity=1;mv(cs.S,700-W/2,135-H/2,0);zl.textContent='';svg.getBoundingClientRect()};
-  const run=k=>{reset();$$('.nda-ctrl button',el).forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
-    const nd=k!=='typ',chosen=k==='mono'?'bot':'top';
-    cap.innerHTML='<b>1 ·</b> An egg-making cell in the ovary holds a pair of chromosome 21.';
-    at(1100,()=>{svg.classList.add('split');$('.nda-parent',el).style.opacity=0;eg(eggs.top,110,72,1,1);eg(eggs.bot,110,200,1,1);
-      if(nd){svg.classList.add('oops');mv(cs.A,110-W-2,72-H/2);mv(cs.B,110+2,72-H/2);cap.innerHTML='<b>2 · Nondisjunction.</b> The pair fails to separate. One egg gets <b>both</b> copies, and the other gets <b>none</b>.'}
-      else{mv(cs.A,110-W/2,72-H/2);mv(cs.B,110-W/2,200-H/2);cap.innerHTML='<b>2 ·</b> The pair separates normally. Each egg gets <b>one</b> copy.'}});
-    at(3000,()=>{svg.classList.remove('oops');const other=chosen==='top'?'bot':'top';eggs[chosen].classList.add('chosen');eg(eggs[chosen],400,135,1.3,1);eg(eggs[other],eggs[other]===eggs.top?110:110,other==='top'?72:200,1,.15);
-      const inEgg=chosen==='top'?(nd?['A','B']:['A']):(nd?[]:['B']);const outEgg=['A','B'].filter(x=>!inEgg.includes(x));
-      outEgg.forEach(x=>{cs[x].style.transition='opacity .6s';cs[x].style.opacity=.15});spot(inEgg,400,135);
-      cap.innerHTML=`<b>3 ·</b> The egg with <b>${inEgg.length===2?'two copies':inEgg.length?'one copy':'no copy'}</b> of chromosome 21 is the one that gets fertilized.`;
-      at(1200-0,()=>{sp.style.transition='transform 1.5s cubic-bezier(.45,0,.55,1)';sp.style.transform=`translate(${400+57+26}px,135px)`;cs.S.style.transition='transform 1.5s cubic-bezier(.45,0,.55,1)';cs.S.style.transform=`translate(${(400+57+26-W/2).toFixed(1)}px,${(135-H/2).toFixed(1)}px)`});
-      at(2900,()=>{svg.classList.add('fert');sp.style.transition='opacity .6s';sp.style.opacity=0;spot([...inEgg,'S'],400,135);cap.innerHTML='<b>4 ·</b> The sperm fuses with the egg and adds its one copy.'});
-      at(4100,()=>{svg.classList.add('done');const n=inEgg.length+1;const lab={2:'Zygote · 2 copies · typical (46)',3:'Zygote · 3 copies · trisomy 21 (47)',1:'Zygote · 1 copy · monosomy 21 (45)'}[n];zl.textContent=lab;
-        cap.innerHTML={2:'<b>Result:</b> a zygote with two copies, one from each parent. Typical.',3:'<b>Result:</b> a zygote with <b>three</b> copies of chromosome 21. That’s <b>trisomy 21</b>, the cause of Down syndrome.',1:'<b>Result:</b> a zygote with only <b>one</b> copy of chromosome 21. That’s <b>monosomy 21</b>, which is not compatible with life.'}[n];
-        seen.add(k);if(seen.has('tri')&&seen.has('mono'))fin()})})};
-  $$('.nda-ctrl button',el).forEach(b=>b.onclick=()=>run(b.dataset.k));
-  reset();onCleanup(()=>timers.forEach(clearTimeout));
+  const eg=(n,x,y,s,op,dur=1,ease='cubic-bezier(.5,0,.3,1)')=>{n.style.transition=dur?`transform ${dur}s ${ease},opacity .6s`:'none';n.style.transform=`translate(${x}px,${y}px) scale(${s})`;n.style.opacity=op};
+  const spot=(list,cx,cy,dur=1,ease)=>list.forEach((k,i)=>{const n=cs[k],x=cx-(list.length*W+(list.length-1)*4)/2+i*(W+4),y=cy-H/2;if(ease){n.style.transition=`transform ${dur}s ${ease},opacity .5s`;n.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;n.style.opacity=1}else mv(n,x,y,dur)});
+  // where each gamete sits after the split: eggs at the cell's spot, sperm heads a little to the right so their tails fit
+  const GX=()=>src==='egg'?110:140,GY={top:72,bot:200},GS=()=>1;
+  const reset=()=>{timers.forEach(clearTimeout);timers=[];draw();const E=src==='egg';
+    parent.style.opacity=1;Object.values(gam).forEach(g=>eg(g,110,135,.6,0,0));
+    spot(['A','B'],110,135,0);
+    if(E){eg(mate,700,135,1,1,0);mv(cs.S,700-W/2,135-H/2,0)}else{eg(mate,400,135,1.3,.25,0);mv(cs.S,400-W/2,135-H/2,0,.25)}
+    svg.getBoundingClientRect()};
+  const run=k=>{reset();$$('.nda-ctrl [data-k]',el).forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));
+    const E=src==='egg',g=E?'egg':'sperm',nd=k!=='typ',chosen=k==='mono'?'bot':'top',gx=GX(),gs=GS();
+    cap.innerHTML=`<b>1 ·</b> ${E?'An egg-making cell in the ovary':'A sperm-making cell in the testis'} holds a pair of chromosome 21.`;
+    at(1100,()=>{svg.classList.add('split');parent.style.opacity=0;lab1.style.opacity=0;eg(gam.top,gx,GY.top,gs,1);eg(gam.bot,gx,GY.bot,gs,1);
+      if(nd){svg.classList.add('oops');spot(['A','B'],gx,GY.top);cap.innerHTML=`<b>2 · Nondisjunction.</b> The pair fails to separate. One ${g} gets <b>both</b> copies, and the other gets <b>none</b>.`}
+      else{spot(['A'],gx,GY.top);spot(['B'],gx,GY.bot);cap.innerHTML=`<b>2 ·</b> The pair separates normally. Each ${g} gets <b>one</b> copy.`}});
+    at(3000,()=>{svg.classList.remove('oops');const other=chosen==='top'?'bot':'top';
+      const inG=chosen==='top'?(nd?['A','B']:['A']):(nd?[]:['B']),outG=['A','B'].filter(x=>!inG.includes(x)),n=inG.length;
+      eg(gam[other],gx,GY[other],gs,.15);outG.forEach(x=>{cs[x].style.transition='opacity .6s';cs[x].style.opacity=.15});
+      const copies=n===2?'two copies':n?'one copy':'no copy';
+      if(E){gam[chosen].classList.add('chosen');eg(gam[chosen],400,135,1.3,1);spot(inG,400,135);
+        cap.innerHTML=`<b>3 ·</b> The egg with <b>${copies}</b> of chromosome 21 is the one that gets fertilized.`;
+        at(1200,()=>{const ease='cubic-bezier(.45,0,.55,1)',tx=400+57+28;eg(mate,tx,135,1,1,1.5,ease);spot(['S'],tx,135,1.5,ease)});
+        at(2900,()=>{svg.classList.add('fert');mate.style.transition='opacity .6s';mate.style.opacity=0;spot([...inG,'S'],400,135);cap.innerHTML='<b>4 ·</b> The sperm fuses with the egg and adds its one copy.'})}
+      else{mate.classList.add('chosen');eg(mate,400,135,1.3,1);mv(cs.S,400-W/2,135-H/2,.6,1);
+        cap.innerHTML=`<b>3 ·</b> The sperm with <b>${copies}</b> of chromosome 21 is the one that reaches the egg.`;
+        at(400,()=>{const ease='cubic-bezier(.45,0,.55,1)',tx=400-57-31;eg(gam[chosen],tx,135,gs,1,1.6,ease);spot(inG,tx,135,1.6,ease)});
+        at(2300,()=>{svg.classList.add('fert');gam[chosen].style.transition='opacity .6s';gam[chosen].style.opacity=0;spot(['S',...inG],400,135);
+          cap.innerHTML=`<b>4 ·</b> The sperm fuses with the egg. The egg adds its one copy${n?'':', and the sperm adds none'}.`})}
+      at(E?4100:3500,()=>{svg.classList.add('done');const z=n+1;zl.textContent={2:'Zygote · 2 copies · typical (46)',3:'Zygote · 3 copies · trisomy 21 (47)',1:'Zygote · 1 copy · monosomy 21 (45)'}[z];
+        cap.innerHTML={2:'<b>Result:</b> a zygote with two copies, one from each parent. Typical.',3:`<b>Result:</b> a zygote with <b>three</b> copies of chromosome 21. That’s <b>trisomy 21</b>, the cause of Down syndrome. Here the extra copy came from the ${g}.`,1:`<b>Result:</b> a zygote with only <b>one</b> copy of chromosome 21. That’s <b>monosomy 21</b>, which is not compatible with life. Here the missing copy is the one the ${g} should have brought.`}[z];
+        seen.add(k);if(nd)bySrc.add(src);if(seen.has('tri')&&seen.has('mono')&&bySrc.size===2)fin()})})};
+  $$('.nda-ctrl [data-k]',el).forEach(b=>b.onclick=()=>run(b.dataset.k));
+  $$('.nda-ctrl [data-src]',el).forEach(b=>b.onclick=()=>{src=b.dataset.src;$$('.nda-ctrl [data-src]',el).forEach(x=>x.setAttribute('aria-pressed',x===b));$$('.nda-ctrl [data-k]',el).forEach(x=>x.setAttribute('aria-pressed','false'));reset();cap.textContent=`Now the mistake happens while the ${src} is made. Pick an outcome.`});
+  reset();cap.textContent='Pick where the mistake happens, then pick an outcome to watch.';onCleanup(()=>timers.forEach(clearTimeout));
 }
-
 /* ---------- lessons ---------- */
 function cfu(el,it){const f=task(el);const o=shuffle(it.options.map((x,i)=>({...x,i})));renderMCQ(el,{...it,options:o,ans:o.findIndex(x=>x.i===it.ans)},()=>{},{noNext:true,onAnswer:f})}
 /* tap the steps in the right order */
@@ -3182,7 +3232,7 @@ function walkthrough(root){const fin=task($('#walk',root));
   const moves=[
     {t:'Move 1 · Count',q:'How many chromosomes are in this karyotype?',opts:['45','46','47'],ans:'47',why:'47, one more than the typical 46. Something is extra.'},
     {t:'Move 2 · Check pair 23',q:'Look at the sex chromosomes. Is this patient male or female?',opts:['Male','Female'],ans:sex==='M'?'Male':'Female',why:sex==='M'?'There’s a Y chromosome, so male.':'Two X chromosomes and no Y, so female.'},
-    {t:'Move 3 · Scan every pair',q:'Tap the pair on the karyotype that doesn’t look like the others.',tap:n,why:`Pair ${n} has three copies instead of two. That’s a trisomy.`},
+    {t:'Move 3 · Scan every pair',q:'Aneuploidy means a pair has too many or too few copies. Tap the pair that shows aneuploidy.',tap:n,why:`Pair ${n} has three copies instead of two. That’s a trisomy.`},
     {t:'Move 4 · Write the notation',q:'Notation lists the total, then the sex chromosomes, then any extra (+) or missing (−) autosome. Which fits this patient?',opts:shuffle([ans4,`46,${sx},+${n}`,`47,${sx},-${n}`,`47,${sx==='XY'?'XX':'XY'},+${n}`]),ans:ans4,mono:true,why:`<span class="mono">${ans4}</span> is the karyotype of ${CONDS[cond].name}, also called ${CONDS[cond].alt}. You’ll meet all six conditions on the next page.`}];
   let m=0,tapActive=false;
   const success=mv=>{const last=m===moves.length-1;if(last)fin();showFB($('.fb',area),true,mv.why+(last?' Walkthrough complete.':''),()=>{m++;show()},last?{noNext:true}:{label:'Next move'})};
@@ -3192,7 +3242,7 @@ function walkthrough(root){const fin=task($('#walk',root));
     $$('.seg button',area).forEach(b=>b.onclick=()=>{if(b.disabled)return;if(b.dataset.v===mv.ans){$$('.seg button',area).forEach(x=>x.disabled=true);b.setAttribute('aria-pressed','true');success(mv)}else{b.classList.add('wrongb');b.disabled=true;showFB($('.fb',area),false,'Try another one.',null,{noNext:true})}})};
   kg.addEventListener('click',e=>{const sl=e.target.closest('.slot');if(!sl||!tapActive)return;const mv=moves[m];
     if(sl.dataset.slot===mv.tap){tapActive=false;kg.classList.remove('armed');sl.classList.add('hl');success(mv)}
-    else{sl.classList.add('bad');setTimeout(()=>sl.classList.remove('bad'),500);toast('Not that one. Count the chromosomes in each pair.')}});
+    else{sl.classList.add('bad');setTimeout(()=>sl.classList.remove('bad'),500);toast('Not that one. Count the copies in each pair. Which pair has more or fewer than two?')}});
   kg.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('slot')){e.preventDefault();e.target.click()}});
   show();
 }
@@ -3329,9 +3379,9 @@ const LEARN={
     {html:sexPairHTML(['9','9']),opts:['Autosomes','Sex chromosomes'],ans:0,why:'This is pair 9. Any pair from 1 to 22 is an autosome pair.'},
     {html:sexPairHTML(['X','X','Y']),opts:['Male','Female'],ans:0,why:'Two X chromosomes, but there’s still a Y, and any Y means male. You’ll see this pattern again in Level 3.'}]))}},
  {title:'Too many, too few',html:()=>SEC('Too many, too few',`<p>When an egg or sperm forms, each pair is supposed to split. Sometimes a pair sticks together, and the baby ends up with too many or too few copies. That’s <b>aneuploidy</b>.</p>${ndFigure()}${ACT('Quick check','',`<div id="ac0"></div>`)}`,{note:'aneu'})
-  +SEC('Watch it happen',`<p class="small muted">Notice that the mistake happens <i>before</i> fertilization, when the egg is made. (It can happen when sperm are made, too.)</p>${ACT('Watch','Play Trisomy and Monosomy to see how each one happens.',`<div id="nda"></div>`)}`)
+  +SEC('Watch it happen',`<p class="small muted">The mistake happens <i>before</i> fertilization, while an egg or a sperm is being made. It can happen in either parent.</p>${ACT('Watch','Play Trisomy and Monosomy, and try the mistake in both the egg and the sperm.',`<div id="nda"></div>`)}`)
   +SEC('Try it yourself',`<p><b>Trisomy</b> means one extra copy. <b>Monosomy</b> means one missing.</p>${ACT('Tap','Remove a copy, then add copies, and read what changes.',`<div class="aneu"><div class="lightbox aneu-box"><div class="slot" id="a21"></div></div><div class="aneu-read"><div class="count" id="aCount"></div><p id="aLabel"></p><div class="row"><button class="btn ghost" id="minus" type="button">− Remove a copy</button><button class="btn ghost" id="plus" type="button">+ Add a copy</button></div></div></div>`)}${ACT('Quick check','',`<div id="c1"></div>`)}`),
-  bind:root=>{cfu($('#ac0',root),{q:'An egg ends up with two copies of chromosome 21, and a typical sperm adds one. How many copies does the zygote have?',options:[{text:'3: trisomy'},{text:'2: typical'},{text:'1: monosomy'}],ans:0,why:'2 + 1 = 3 copies. One extra copy is a trisomy.'});
+  bind:root=>{ndFigureBind($('.nd',root));{const sp=R()<.5;cfu($('#ac0',root),{q:sp?'A sperm ends up with two copies of chromosome 21, and a typical egg adds one. How many copies does the zygote have?':'An egg ends up with two copies of chromosome 21, and a typical sperm adds one. How many copies does the zygote have?',options:[{text:'3: trisomy'},{text:'2: typical'},{text:'1: monosomy'}],ans:0,why:'2 + 1 = 3 copies. One extra copy is a trisomy, whichever parent it came from.'})}
    ndAnim($('#nda',root));let n=2;const L={1:['Monosomy 21','One copy is missing. Total: 45 chromosomes. Missing an autosome like this is not compatible with life.'],2:['Typical','One copy from each parent. Total: 46 chromosomes.'],3:['Trisomy 21','An extra copy. Total: 47 chromosomes. This is the karyotype of Down syndrome.']};
    const draw=()=>{$('#a21',root).innerHTML=`<div class="slot-chr">${Array.from({length:n},(_,i)=>chrSVG('21',{scale:1.6,w:30,copy:i})).join('')}</div><div class="slot-lab">21</div>`;$('#aCount',root).textContent=L[n][0];$('#aLabel',root).textContent=L[n][1];$('#minus',root).disabled=n<=1;$('#plus',root).disabled=n>=3};
    {const fa=task($('#a21',root)),sn=new Set();$('#minus',root).onclick=()=>{n--;draw();sn.add(n);if(sn.has(1)&&sn.has(3))fa()};$('#plus',root).onclick=()=>{n++;draw();sn.add(n);if(sn.has(1)&&sn.has(3))fa()};draw()}

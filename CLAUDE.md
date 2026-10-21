@@ -32,6 +32,8 @@ Single-file web game for Biology Standard 2.1, Chromosomes and Karyotyping (HS-L
 - `SET`, `SET_KEYS`, `applySettings`, `setSetting`, `openSettings` – the Settings drawer (menu button in the top bar): Theme, Text size, Motion, Background animation, Color vision, Dyslexia-friendly reading (Lexend), Reading ruler (`ruler`), plus Contents, Credential report, and Start over. Each setting has its own localStorage key (`mustang-karyo-theme`, `-text`, `-motion`, `-bg`, `-cvd`, `-dyslexia`, `-ruler`), so Start over keeps them. A small script in `<head>` applies them before the page paints. Canvases repaint on theme changes through `onScheme`; use `isDark()` instead of reading the color-scheme media query.
 - `ORGS`, `FAKES`, `impostor` – the Level 1 species match (Human plus three others each time) and the Spot the impostor activity.
 - `tableGame`, `rowMark` – the rebuild-the-table game: placed tiles lock in their row color with a checkmark stamp.
+- `mountUnscramble` – Prove It scramble items: students can type the answer or tap/drag letter tiles; both stay in sync.
+- `ndFigure`, `ndRows`, `ndAnim` – Level 2 "Too many, too few": the mistake can happen in the egg or the sperm (Mistake in: Egg/Sperm), and chromosome 21 is drawn as a copied, banded chromosome like the Level 3 karyotypes.
 - `layoutPins`, `watchPins` – placed gene pins sit in a column beside the chromosome 11 ideogram with leader lines, so they never cover a band.
 - `AMB.calm` – the animated background holds still if the page runs under about 24 frames a second.
 - `NOTES` – My Notes entries; each unlocks when the lesson part with the matching `note` key is finished.
