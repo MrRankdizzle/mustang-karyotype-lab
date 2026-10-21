@@ -152,15 +152,18 @@ td.mono{white-space:nowrap}
 @media (max-width:760px){.morph{grid-template-columns:1fr}}
 .morph canvas{width:100%;aspect-ratio:1;display:block;border-radius:16px;background:var(--surface-2);border:1px solid var(--line);max-width:360px;margin:0 auto}
 .mfig{display:grid;gap:10px;width:100%;max-width:360px;margin:0 auto}
-.msteps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
-.msteps li{position:relative;padding-top:10px;text-align:center;font:600 .62rem/1.15 var(--font-mono);color:var(--muted);transition:color .3s}
-.msteps li::before{content:'';position:absolute;top:0;left:1px;right:1px;height:4px;border-radius:2px;background:var(--line);transition:background .3s}
-.msteps li.done::before{background:color-mix(in srgb,var(--dna) 40%,var(--line))}
-.msteps li.on{color:var(--ink)}
-.msteps li.on::before{background:var(--dna)}
-@media (max-width:520px){.msteps li{font-size:0;padding-top:4px}}
-.mcap{margin:0;min-height:4.2em;font-size:.92rem;line-height:1.4}
-.mcap b{display:block;font:700 1.05rem/1.2 var(--font-display);color:var(--dna)}
+.msteps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.msteps button{appearance:none;border:0;background:none;margin:0;cursor:pointer;position:relative;padding:12px 0 4px;text-align:center;font:600 .62rem/1.15 var(--font-mono);color:var(--muted);border-radius:6px;transition:color .3s}
+.msteps button::before{content:'';position:absolute;top:2px;left:1px;right:1px;height:5px;border-radius:3px;background:var(--line);transition:background .3s}
+.msteps button:hover{color:var(--ink)}.msteps button:hover::before{background:color-mix(in srgb,var(--dna) 55%,var(--line))}
+.msteps button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.msteps button.done::before{background:color-mix(in srgb,var(--dna) 40%,var(--line))}
+.msteps button.on{color:var(--ink)}
+.msteps button.on::before{background:var(--dna)}
+@media (max-width:520px){.msteps button{padding:2px 0 18px}.msteps button span{display:none}}
+.mnav{gap:8px}
+.mcap{margin:0;min-height:1.4em;font:500 .78rem/1.4 var(--font-mono);color:var(--muted)}
+.mcap b{color:var(--dna)}
 .stage{font:800 1.5rem/1.1 var(--font-display)}
 .stage small{display:block;font:600 .75rem/1.4 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:4px}
 input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
@@ -466,17 +469,27 @@ input[type=range]{width:100%;accent-color:var(--accent-ink);height:30px}
 .ep-label{position:absolute;left:50%;top:9%;transform:translateX(-50%);font:600 .6rem/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--lightbox-ink);opacity:.7;white-space:nowrap}
 .zoom{display:flex;align-items:flex-start;justify-content:center;gap:4px;flex-wrap:wrap;padding:6px 0}
 .zp{margin:0;display:grid;justify-items:center;gap:8px;width:118px;animation:zrise .9s ease-out backwards;animation-delay:calc(var(--i)*.15s)}
-.zc{width:104px;height:104px;border-radius:50%;background:var(--surface);border:2px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;overflow:hidden;transition:transform .6s ease}
-.zp:hover .zc{transform:scale(1.025)}
+.zc{width:104px;height:104px;border-radius:50%;background:var(--surface);border:2px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;overflow:hidden;transition:transform .6s ease,box-shadow .6s ease,border-color .6s ease}
+.zp:hover .zc{transform:translateY(-3px);border-color:color-mix(in srgb,var(--accent) 55%,var(--line));box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 16%,transparent),0 10px 24px color-mix(in srgb,var(--accent) 22%,transparent)}
 .zc svg{width:88%;height:88%}
 .zp figcaption{display:grid;justify-items:center;text-align:center;gap:2px}
 .zp figcaption b{font:700 .95rem/1.1 var(--font-display)}
 .zp figcaption span{font:500 .72rem/1.2 var(--font-mono);color:var(--muted)}
 .zarrow{font:800 1.8rem/104px var(--font-display);color:var(--accent)}
 @media (max-width:640px){.zarrow{display:none}.zp{width:96px}.zc{width:84px;height:84px}}
-/* the strip stays calm: a slow few-pixel sway for the helix, a soft fade-in for each circle */
-.zhelix{animation:zsway 14s ease-in-out infinite alternate}
-@keyframes zsway{from{transform:translateX(0)}to{transform:translateX(-6px)}}
+/* the strip stays calm: each circle has its own slow loop (8s or longer, a few pixels at most), staggered so none move together */
+.zhelix{animation:zturn 30s linear infinite}
+@keyframes zturn{to{transform:translateX(-50px)}}
+.zbreathe{transform-origin:50px 50px;animation:zbreathe 10s ease-in-out -3s infinite alternate}
+@keyframes zbreathe{from{transform:scale(1) rotate(-1deg)}to{transform:scale(1.03) rotate(1deg)}}
+.zdrift{transform-origin:50px 50px;animation:zdrift 13s ease-in-out -6s infinite alternate}
+@keyframes zdrift{from{transform:rotate(-3deg) translateX(-1px)}to{transform:rotate(3deg) translateX(1px)}}
+.zfloat{animation:zfloat var(--d,10s) ease-in-out var(--dl,0s) infinite alternate}
+@keyframes zfloat{from{transform:translate(-1.5px,1px)}to{transform:translate(1.5px,-1.5px)}}
+.zbob{animation:zbob 9s ease-in-out -2s infinite alternate}
+@keyframes zbob{from{transform:translateY(0)}to{transform:translateY(-2px)}}
+.zwave{transform-origin:62.5px 37px;animation:zwave 8s ease-in-out infinite alternate}
+@keyframes zwave{from{transform:rotate(-6deg)}to{transform:rotate(8deg)}}
 @keyframes zrise{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .mat{--chr-body:var(--mom-body);--chr-edge:var(--mom-edge)}
@@ -1346,12 +1359,18 @@ function paintMicros(root){requestAnimationFrame(()=>{$$('canvas.micro',root).fo
 /* ---------- DNA packing levels (Level 1 slider): helix → nucleosomes → fiber → supercoiled loops → chromosome ---------- */
 // One continuous zoom-out. The close-up scenes are built in nanometres around the origin (real DNA wrapped on histones);
 // the long fiber that condenses into the X uses chromosome units (1 unit = 3000 nm), so the two scales line up at the handoff.
+// t: where the stage starts on the slider; rest: the frame Next, the step bar, and Play stop on
 const PACK_STAGES=[
- {t:0,name:'DNA',say:'Zoomed all the way in, DNA is a double helix: two strands joined by base pairs, like a twisted ladder.'},
- {t:.15,name:'Nucleosomes',say:'The DNA wraps around clusters of histone proteins, like thread on spools. Each spool is a nucleosome.'},
- {t:.37,name:'Chromatin fiber',say:'The nucleosomes coil into a thicker fiber. In a working cell, this loose fiber fills the nucleus.'},
- {t:.66,name:'Supercoiled',say:'The fiber folds into loops, and the loops coil up tighter and tighter.'},
- {t:.86,name:'Chromosome',say:'Fully packed: two identical sister chromatids joined at the centromere.'}];
+ {t:0,rest:.03,name:'DNA',size:'about 2 nm wide',label:'Zoomed all the way in',
+  text:'This is DNA itself: a double helix of two strands joined by base pairs, like a twisted ladder. Bare like this, it’s far too long and thin to fit in a nucleus.'},
+ {t:.16,rest:.33,name:'Nucleosomes',size:'about 11 nm wide',label:'Wrapping up',
+  text:'The DNA wraps around small clusters of histone proteins, like thread wound on spools. Each spool of DNA and histones is a nucleosome.'},
+ {t:.42,rest:.5,name:'Chromatin fiber',size:'about 30 nm wide',label:'Everyday working cell',
+  text:'The nucleosomes coil into a thicker fiber called chromatin. In a working cell, this loose chromatin spreads through the nucleus, so the cell can still read its genes to make proteins.'},
+ {t:.66,rest:.77,name:'Supercoiled',size:'about 300 nm wide',label:'Getting ready to divide',
+  text:'Once the cell has copied its DNA and gets ready to divide, the chromatin fiber loops and folds tighter and tighter. The edge of the nucleus fades away so the DNA can be moved.'},
+ {t:.86,rest:1,name:'Chromosome',size:'about 1,400 nm wide',label:'Ready to divide',
+  text:'Fully packed: two identical sister chromatids joined at a centromere. It’s compact enough to move without tangling, and thick enough to see under a light microscope.'}];
 const packStage=t=>PACK_STAGES.reduce((a,s,i)=>t>=s.t?i:a,0);
 const sstep=(a,b,x)=>{x=Math.min(1,Math.max(0,(x-a)/(b-a)));return x*x*(3-2*x)};
 const PACKS={};
@@ -1986,15 +2005,31 @@ function eyepiece(){
 
 /* body → DNA zoom strip */
 function zoomStrip(){
-  const person=`<svg viewBox="0 0 100 100"><circle cx="50" cy="25" r="12" fill="var(--accent-ink)"/><path d="M30 94V60a20 20 0 0 1 40 0v34Z" fill="var(--accent-ink)"/><path d="M27 62l-8 22M73 62l8 22" stroke="var(--accent-ink)" stroke-width="7" stroke-linecap="round"/></svg>`;
+  // a friendly teen in a Carolina blue Mustangs shirt; the right arm waves, and faint circles hint at the cells inside
+  const SKIN='#F2C9A8',INK='#1A2C3C';
+  const person=`<svg viewBox="0 0 100 100"><defs><clipPath id="zc-you"><path d="M37 34Q50 30 63 34L64 60H36Z"/><path d="M37.5 58H62.5L61.5 86H52.5L50 66L47.5 86H38.5Z"/></clipPath></defs><g class="zbob">
+    <path d="M37.5 58H62.5L61.5 86H52.5L50 66L47.5 86H38.5Z" fill="#3E6189"/>
+    <ellipse cx="43" cy="88.5" rx="6" ry="3" fill="#F4F6F8" stroke="#8A99A8" stroke-width="1"/><ellipse cx="57" cy="88.5" rx="6" ry="3" fill="#F4F6F8" stroke="#8A99A8" stroke-width="1"/>
+    <path d="M37.5 37L32 56" stroke="${SKIN}" stroke-width="6" stroke-linecap="round"/><circle cx="31.5" cy="57.5" r="3.4" fill="${SKIN}"/>
+    <g class="zwave"><path d="M62.5 37L72 24" stroke="${SKIN}" stroke-width="6" stroke-linecap="round"/><circle cx="73" cy="21.5" r="3.6" fill="${SKIN}"/></g>
+    <path d="M37 34Q50 30 63 34L64 60H36Z" fill="#4B9CD3"/><path d="M37 34L32 44L37.5 46.5L39 40Z" fill="#4B9CD3"/><path d="M63 34L69.5 42.5L64 46L61 40Z" fill="#4B9CD3"/>
+    <g clip-path="url(#zc-you)" fill="#fff" opacity=".22">${[[41,39],[58,37],[45,54],[56,51],[41,64],[59,66],[43,77],[57,79]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.2"/>`).join('')}</g>
+    <path d="M45.5 48V41.5L50 45.5L54.5 41.5V48" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="46.5" y="26" width="7" height="6" rx="2" fill="${SKIN}"/>
+    <circle cx="39.6" cy="18.5" r="2.4" fill="${SKIN}"/><circle cx="60.4" cy="18.5" r="2.4" fill="${SKIN}"/><circle cx="50" cy="17.5" r="10.6" fill="${SKIN}"/>
+    <path d="M39.4 17.5Q38.6 6 50 5.8Q61.4 6 60.6 17Q58 11.5 52 11.4Q49 13.6 43 12.8Q40.6 14.6 39.4 17.5Z" fill="#4A3326"/>
+    <circle cx="45.8" cy="18.6" r="1.5" fill="${INK}"/><circle cx="54.2" cy="18.6" r="1.5" fill="${INK}"/>
+    <circle cx="43.2" cy="22.2" r="1.7" fill="#E8907A" opacity=".45"/><circle cx="56.8" cy="22.2" r="1.7" fill="#E8907A" opacity=".45"/>
+    <path d="M46.4 22.4Q50 26 53.6 22.4" fill="none" stroke="${INK}" stroke-width="1.4" stroke-linecap="round"/></g></svg>`;
   const rng=mulberry32(9);let blob='';for(let i=0;i<=24;i++){const a=i/24*6.283,r=38+Math.sin(a*3)*3+rng()*2;blob+=(i?'L':'M')+(50+Math.cos(a)*r).toFixed(1)+','+(50+Math.sin(a)*r).toFixed(1)}
-  const cell=`<svg viewBox="0 0 100 100"><path d="${blob}Z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/>${[[28,36],[70,62],[64,30],[34,68],[74,44]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="5" ry="2.6" fill="var(--accent)" opacity=".5"/>`).join('')}<circle cx="50" cy="50" r="16" fill="var(--nucleus)" stroke="var(--nucleus-edge)" stroke-width="2"/><circle cx="54" cy="46" r="4.5" fill="var(--dna)" opacity=".6"/></svg>`;
-  const nucleus=`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="var(--nucleus)" stroke="var(--nucleus-edge)" stroke-width="3"/>${tangle(50,50,40,260,17,1.1)}</svg>`;
-  const chrom=`<svg viewBox="0 0 100 100">${coilX(50,50,74,12,{turns:26,amp:4.6,sw:1.3,seed:21})}</svg>`;
+  const cell=`<svg viewBox="0 0 100 100"><path d="${blob}Z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2.5"/>${[[28,36],[70,62],[64,30],[34,68],[74,44]].map(([x,y],i)=>`<ellipse class="zfloat" style="--d:${(9+i*1.3).toFixed(1)}s;--dl:-${(i*2.1).toFixed(1)}s" cx="${x}" cy="${y}" rx="5" ry="2.6" fill="var(--accent)" opacity=".5"/>`).join('')}<circle cx="50" cy="50" r="16" fill="var(--nucleus)" stroke="var(--nucleus-edge)" stroke-width="2"/><circle cx="54" cy="46" r="4.5" fill="var(--dna)" opacity=".6"/></svg>`;
+  const nucleus=`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="var(--nucleus)" stroke="var(--nucleus-edge)" stroke-width="3"/><g class="zdrift">${tangle(50,50,40,260,17,1.1)}</g></svg>`;
+  const chrom=`<svg viewBox="0 0 100 100"><g class="zbreathe">${coilX(50,50,74,12,{turns:26,amp:4.6,sw:1.3,seed:21})}</g></svg>`;
   let s1='',s2='',rungs='';for(let x=-50;x<=150;x+=2){const y1=50+17*Math.sin(x/50*6.283),y2=50-17*Math.sin(x/50*6.283);s1+=(x>-50?'L':'M')+x+','+y1.toFixed(1);s2+=(x>-50?'L':'M')+x+','+y2.toFixed(1)}
   for(let x=-50;x<=150;x+=6.25){const y1=50+17*Math.sin(x/50*6.283),y2=50-17*Math.sin(x/50*6.283);if(Math.abs(y1-y2)>5)rungs+=`<line x1="${x}" x2="${x}" y1="${y1.toFixed(1)}" y2="${(y1+y2)/2}" stroke="var(--accent)" stroke-width="2.6"/><line x1="${x}" x2="${x}" y1="${(y1+y2)/2}" y2="${y2.toFixed(1)}" stroke="var(--mark)" stroke-width="2.6"/>`}
   const dna=`<svg viewBox="0 0 100 100"><defs><clipPath id="zc-dna"><circle cx="50" cy="50" r="46"/></clipPath></defs><g clip-path="url(#zc-dna)"><g class="zhelix">${rungs}<path d="${s1}" fill="none" stroke="var(--dna)" stroke-width="3.2"/><path d="${s2}" fill="none" stroke="var(--accent-ink)" stroke-width="3.2"/></g></g></svg>`;
-  const P=[['You','37 trillion cells',person],['One cell','0.01 mm wide',cell],['Its nucleus','6 µm wide',nucleus],['Chromosome','46 per cell',chrom],['DNA','2 nm wide, 2 m long',dna]];
+  // smallest to largest, so it reads as building up from DNA to you
+  const P=[['DNA','2 nm wide, 2 m long',dna],['Chromosome','46 per cell',chrom],['Nucleus','6 µm wide',nucleus],['Cell','0.01 mm wide',cell],['You','37 trillion cells',person]];
   return `<div class="zoom">${P.map((p,i)=>`${i?'<span class="zarrow" aria-hidden="true">›</span>':''}<figure class="zp" style="--i:${i}"><div class="zc">${p[2]}</div><figcaption><b>${p[0]}</b><span>${p[1]}</span></figcaption></figure>`).join('')}</div>`;
 }
 
@@ -2429,7 +2464,7 @@ function hintFor(it){
   if(it.kind==='create'){const C=CONDS[it.target.cond];const t=44+(isAutoTri(it.target.cond)?1:0)+sexChrFor(it.target.cond,'M').length;return `${C.name} has ${t} chromosomes in total. Start from the typical karyotype and change just one pair: ${isAutoTri(it.target.cond)?'add a copy of chromosome '+C.chr:'the sex chromosomes'}.`}
   return 'Reread the question slowly and use what you learned in the lesson.';
 }
-const TIPS={1:['Drag the slider all the way to “Ready to divide,” play the fertilization to the end, then connect every organism to its number.','Study the table first. When you rebuild it, the color tells you the row, so you only decide: loose and in use (chromatin) or packed to move (chromosome).','Read an address left to right: chromosome, arm, region, band. 11p15 means chromosome 11, short arm, region 1, band 5.','Nucleus edge solid? Chromatin. Edge breaking up? Condensing. No nucleus and separate X shapes? Chromosomes. In Telomere Trouble, try vowels first.','Read the whole definition before you fire. A wrong hit costs a shield, but it also shows you what that word means.'],
+const TIPS={1:['Use Next step (or drag the slider) until you reach the Chromosome, play the fertilization to the end, then connect every organism to its number.','Study the table first. When you rebuild it, the color tells you the row, so you only decide: loose and in use (chromatin) or packed to move (chromosome).','Read an address left to right: chromosome, arm, region, band. 11p15 means chromosome 11, short arm, region 1, band 5.','Nucleus edge solid? Chromatin. Edge breaking up? Condensing. No nucleus and separate X shapes? Chromosomes. In Telomere Trouble, try vowels first.','Read the whole definition before you fire. A wrong hit costs a shield, but it also shows you what that word means.'],
  2:['A lab can’t photograph chromosomes until they’re condensed, so pausing the cells mid-division comes before staining and photographing.','Try all three clue tabs. Banding is the strongest clue when two chromosomes are about the same size.','Follow the dashed line. Middle is metacentric, off center is submetacentric, near the tip is acrocentric.','Any Y means male. Pairs 1 through 22 are autosomes, and pair 23 is the sex chromosomes.','Play both Trisomy and Monosomy, then try the buttons: remove a copy, then add one.','Karyotypes are a zoomed-out view. Whole chromosomes and big pieces show up. Single genes don’t.','Pull back farther for more power, and aim higher for the far towers. The dotted line shows your path.'],
  3:['Count, check pair 23, scan for a pair of three or one, then write the notation.','+21 is Down, +18 is Edwards, +13 is Patau, XXY is Klinefelter, XXX is Triple X, and a lone X is Turner.','Open each of the six conditions, then tap the numbered markers. Single palm crease: Down. Overlapping fingers: Edwards. Extra finger: Patau. Webbed neck: Turner.']};
 let XOPEN=false,XJUST=false;
@@ -2676,33 +2711,42 @@ function walkthrough(root){const fin=task($('#walk',root));
 const sexPairHTML=ids=>{const sc=SC();return `<div class="lightbox cvis"><div class="slot-chr">${ids.map((id,i)=>chrSVG(id,{scale:sc.big*.6,w:sc.bw-2,copy:i})).join('')}</div></div>`};
 const LEARN={
 1:[
- {title:'The packing problem',html:()=>SEC('Pack it up',`<p>Each of your cells holds about 2 meters of DNA in a nucleus 6 micrometers wide. That’s like stuffing 40 kilometers of thread into a tennis ball.</p>
+ {title:'The packing problem',html:()=>SEC('Pack it up',`<p>Each of your cells holds about 2 meters of DNA in a nucleus 6 micrometers wide. That’s like stuffing 40 kilometers of thread into a tennis ball. Here’s how it builds up, from DNA all the way to you.</p>
   ${zoomStrip()}
-  ${ACT('Drag the slider','How does it fit? The cell packs its DNA in levels, each one tighter than the last. Drag the slider all the way to “Ready to divide” and watch each level form.',`<div class="morph"><div class="mfig"><canvas id="mc" role="img" aria-label="Animation of DNA packing from a double helix into a chromosome"></canvas><ol class="msteps" aria-hidden="true">${PACK_STAGES.map(p=>`<li>${p.name}</li>`).join('')}</ol><p class="mcap" id="mcap" aria-live="polite"></p></div><div class="stack"><div class="stage" id="stage"></div><p id="stageText"></p><div><label for="cond" class="lab">Get the cell ready to divide</label><input type="range" id="cond" min="0" max="100" value="0"><div class="range-ends"><span>Everyday work</span><span>Ready to divide</span></div></div><div><button class="btn ghost" id="play" type="button">Play the animation</button></div></div></div>`)}
+  ${ACT('Pack the DNA','How does it fit? The cell packs its DNA in levels, each one tighter than the last. Drag the slider, or use Next step to go one level at a time, until you reach the Chromosome.',`<div class="morph"><div class="mfig"><canvas id="mc" role="img" aria-label="Animation of DNA packing from a double helix into a chromosome"></canvas><div class="msteps" role="group" aria-label="Packing stages">${PACK_STAGES.map((p,i)=>`<button type="button" data-s="${i}" aria-label="Go to stage ${i+1}: ${p.name}"><span>${p.name}</span></button>`).join('')}</div><p class="mcap" id="mcap"></p></div><div class="stack"><div class="stack" style="gap:8px" aria-live="polite"><div class="stage" id="stage"></div><p id="stageText"></p></div><div><label for="cond" class="lab">Packing level</label><input type="range" id="cond" min="0" max="100" value="0"><div class="range-ends"><span>Bare DNA</span><span>Chromosome</span></div></div><div class="row mnav"><button class="btn ghost sm" id="mprev" type="button">← Previous step</button><button class="btn ghost sm" id="mnext" type="button">Next step →</button><button class="btn sm" id="mplay" type="button">Play the animation</button></div></div></div>`)}
   ${ACT('Quick check','',`<div id="p0c1"></div>`)}`,{note:'pack'})
   +SEC('46 pieces',`<p>Your DNA is split into separate pieces, and each piece packed tight is one chromosome. You got <b>23 from your mom’s egg</b> and <b>23 from your dad’s sperm</b>.</p>
   ${ACT('Watch','Play the fertilization all the way through and see what every body cell ends up with.',`<div id="fz"></div>`)}
   ${ACT('Quick check','',`<div id="p0c2"></div>`)}`,{note:'count'})
   +SEC('Every species has its own number',`${ACT('Connect','Match each organism to how many chromosomes are in one of its body cells. You already know one. Guess the rest; misses just teach you.',`<div id="spm"></div>`)}`,{note:'species'}),
   bind:root=>{
-   const cv=$('#mc',root),rg=$('#cond',root),st=$('#stage',root),tx=$('#stageText',root),cap=$('#mcap',root),steps=$$('.msteps li',root);let t=0,target=null,raf,timer,si=-1,drawn='';const fm=task(cv);
-   const setStage=()=>{if(t<.66){st.innerHTML='<small>Everyday working cell</small>Chromatin';tx.textContent='The DNA is loose and spread all through the nucleus. That loose form, DNA wrapped around histone proteins, is chromatin. Loose DNA is easy for the cell to read, so this is when genes are used to make proteins. Cells spend most of their lives like this.'}
-     else if(t<.86){st.innerHTML='<small>Getting ready to divide</small>Condensing';tx.textContent='The cell has copied its DNA and is getting ready to split into two cells. The chromatin fiber loops and coils tighter and tighter, and the edge of the nucleus fades away so the DNA can be moved.'}
-     else{if(t>.97)fm();st.innerHTML='<small>Ready to divide</small>Chromosome';tx.textContent='Fully packed. Each chromosome is now two identical copies, called sister chromatids, joined at a centromere. It is compact enough to move without tangling, and thick enough to see under a light microscope.'}
-     const i=packStage(t);if(i!==si){si=i;const p=PACK_STAGES[i];cap.innerHTML=`<b>${p.name}</b> ${p.say}`;cv.setAttribute('aria-label','Animation of DNA packing. Now showing: '+p.name);steps.forEach((li,j)=>{li.classList.toggle('on',j===i);li.classList.toggle('done',j<i)})}};
+   const cv=$('#mc',root),rg=$('#cond',root),st=$('#stage',root),tx=$('#stageText',root),cap=$('#mcap',root),steps=$$('.msteps button',root),prev=$('#mprev',root),next=$('#mnext',root),play=$('#mplay',root);
+   const REST=PACK_STAGES.map(p=>p.rest);let t=0,tw=null,raf,timer,si=-1,drawn='',playing=false;const fm=task(cv);
+   const paint=()=>{if(cv.offsetParent)drawPack(cv,t,0)};
+   // every label follows the stage the picture is in, however t got there
+   const setStage=()=>{const i=packStage(t);if(i===4)fm();if(i===si)return;si=i;const p=PACK_STAGES[i];
+     st.innerHTML=`<small>${p.label}</small>${p.name}`;tx.textContent=p.text;cap.innerHTML=`<b>Stage ${i+1} of ${PACK_STAGES.length}</b> · ${p.name}, ${p.size}`;cv.setAttribute('aria-label','Animation of DNA packing. Now showing: '+p.name);
+     steps.forEach((b,j)=>{b.classList.toggle('on',j===i);b.classList.toggle('done',j<i);if(j===i)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+     prev.disabled=i===0;next.disabled=i===4};
+   const setT=v=>{t=v;rg.value=Math.round(t*100);setStage();if(reduced)paint()};
+   // ease to a stage in about 1.5 s (reduced motion: jump straight there)
+   const goTo=(to,done)=>{if(reduced||Math.abs(to-t)<.002){tw=null;setT(to);done&&done();return}tw={from:t,to,start:null,dur:Math.abs(to-t)<.05?400:1500,done}};
+   const stop=()=>{tw=null;clearTimeout(timer);if(playing){playing=false;play.textContent='Play the animation'}};
+   const aim=()=>packStage(tw?tw.to:t);
+   // Play: move to each stage, hold it about 3.5 s so its text can be read, then go on
+   const playFrom=i=>goTo(REST[i],()=>{if(!playing)return;if(i<4)timer=setTimeout(()=>playFrom(i+1),3500);else stop()});
+   play.onclick=()=>{if(playing){stop();return}stop();playing=true;play.textContent='Pause';if(t>=.97)setT(0);playFrom(REST.findIndex(r=>r>=t-.005))};
+   next.onclick=()=>{stop();goTo(REST[Math.min(4,aim()+1)])};
+   prev.onclick=()=>{stop();const i=aim(),at=tw?tw.to:t;goTo(REST[at>REST[i]+.01?i:Math.max(0,i-1)])};
+   steps.forEach(b=>b.onclick=()=>{stop();goTo(REST[+b.dataset.s])});
+   rg.oninput=()=>{stop();t=rg.value/100;setStage();if(reduced)paint()};
    setStage();
-   if(reduced){
-     // still frames only: redraw when the slider moves; Play steps through one frame per level
-     const paint=()=>{if(cv.offsetParent)drawPack(cv,t,0)};requestAnimationFrame(paint);addEventListener('resize',paint);onCleanup(()=>{removeEventListener('resize',paint);clearTimeout(timer)});
-     rg.oninput=()=>{clearTimeout(timer);t=rg.value/100;setStage();paint()};
-     $('#play',root).onclick=()=>{clearTimeout(timer);const fr=[.03,.32,.5,.76,1];let i=0;const next=()=>{t=fr[i];rg.value=Math.round(t*100);setStage();paint();if(++i<fr.length)timer=setTimeout(next,1600)};next()};
-   }else{
+   if(reduced){requestAnimationFrame(paint);addEventListener('resize',paint);onCleanup(()=>{removeEventListener('resize',paint);clearTimeout(timer)})}
+   else{
      // redraw only when something changed, plus while the helix is close enough to see it turn
-     const loop=time=>{const dt=Math.min(.05,(time-(loop.l||time))/1000);loop.l=time;if(target!==null){t=Math.min(1,t+dt/7.5);if(t>=target){t=target;target=null}rg.value=Math.round(t*100);setStage()}
+     const loop=time=>{if(tw){if(tw.start===null)tw.start=time;const k=Math.min(1,(time-tw.start)/tw.dur),e=k*k*(3-2*k);setT(tw.from+(tw.to-tw.from)*e);if(k>=1){const d=tw.done;tw=null;d&&d()}}
        const key=t+'|'+cv.clientWidth+'|'+getComputedStyle(document.documentElement).getPropertyValue('--dna');if(cv.offsetParent&&(key!==drawn||t<.45)){drawn=key;drawPack(cv,t,time)}raf=requestAnimationFrame(loop)};
-     raf=requestAnimationFrame(loop);onCleanup(()=>cancelAnimationFrame(raf));
-     rg.oninput=()=>{target=null;t=rg.value/100;setStage()};
-     $('#play',root).onclick=()=>{t=0;target=1;setStage()};
+     raf=requestAnimationFrame(loop);onCleanup(()=>{cancelAnimationFrame(raf);clearTimeout(timer)});
    }
    cfu($('#p0c1',root),{q:'A skin cell is busy making proteins right now. What form is most of its DNA in?',options:[{text:'Chromatin: loose, so its genes can be read'},{text:'Chromosomes: tightly packed into X shapes'},{text:'Neither: the DNA leaves the nucleus'}],ans:0,why:'A working cell keeps its DNA loose as chromatin so it can read its genes. It only packs DNA into chromosomes when it gets ready to divide.'});
    mountFertilize($('#fz',root));
