@@ -10,6 +10,8 @@ Students learn through short, gated lessons full of animations, games, and quick
 
 Includes My Notes (open-note notebook that unlocks as students learn), Marty the Mustang lab assistant with capped hints, an Arcade (Vocab Invaders, Chromo Catapult, Telomere Trouble, Chromo-Wordle, Connections), active-time tracking, and a credential report students download as a PDF or PNG (with an optional webcam lab ID photo and Marty's signature) and turn in on Google Classroom.
 
+A Settings menu in the top bar has Theme, Text size, Motion, and Background animation, plus accessibility options: a color-blind-friendly mode, dyslexia-friendly reading, and a reading ruler. Settings are saved on the device and survive Start over.
+
 ## Hosting
 
 It's a single static file (`index.html`) with no build step. On Vercel, import this repo with the **Other** framework preset and leave the build settings empty.
